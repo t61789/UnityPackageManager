@@ -1,0 +1,8 @@
+{
+  "renderFrameworkPath": "D://Shi",
+  "projectPaths": [
+    { "byname": "Main", "path": "D:\\UnityProjects\\PJGRASS" },
+    { "byname": "CBT1", "path": "D:\\UnityProjects\\PJGRASS" },
+    { "byname": "Develop", "path": "D:\\UnityProjects\\PJGRASS" }
+  ]
+}
