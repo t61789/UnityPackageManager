@@ -5,7 +5,7 @@ MenuMgr = None
 import msvcrt
 from typing import Callable
 import readchar
-from utils import *
+from utils import Utils
 
 class KeyAction:
     def __init__(self, key: str, describe: str, action: Callable):
@@ -34,27 +34,25 @@ class MenuMgr:
     onTickStartActions = []
 
     def executeKeyAction(keyName: str):
-        global keyRunning
-        if curMenu == None or keyRunning:
+        if MenuMgr.curMenu == None or MenuMgr.keyRunning:
             return
 
         def runAction(keyAction: KeyAction):
-            global keyRunning
             if keyAction.action:
-                keyRunning = True
+                MenuMgr.keyRunning = True
                 keyAction.action()
-                keyRunning = False
+                MenuMgr.keyRunning = False
 
         executed = False
-        for keyAction in curMenu.keyActions:
+        for keyAction in MenuMgr.curMenu.keyActions:
             if keyName == keyAction.key:
                 runAction(keyAction)
                 executed = True
                 break
 
         if not executed:
-            if curMenu.defaultAction != None:
-                curMenu.defaultAction()
+            if MenuMgr.curMenu.defaultAction != None:
+                MenuMgr.curMenu.defaultAction()
                 executed = True
 
     def displayMenu(menu: Menu):
@@ -73,11 +71,10 @@ class MenuMgr:
 
         for keyAction in menu.keyActions:
             print(intendStr, keyAction.key, ": ", keyAction.describe)
-        printInline(intendStr + "输入: ")
+        Utils.printInline(intendStr + "输入: ")
 
     def switchMenu(menu: Menu):
-        global curMenu
-        curMenu = menu
+        MenuMgr.curMenu = menu
 
     def onTickStart(action: Callable):
         MenuMgr.onTickStartActions.append(action)
@@ -90,10 +87,10 @@ class MenuMgr:
             for action in MenuMgr.onTickStartActions:
                 action()
 
-            MenuMgr.displayMenu(curMenu)
+            MenuMgr.displayMenu(MenuMgr.curMenu)
 
             inputKey = readchar.readkey()
-            printInline(inputKey + "\n")
+            Utils.printInline(inputKey + "\n")
             MenuMgr.executeKeyAction(inputKey)
 
             # 清除在执行命令期间输入的命令

@@ -1,11 +1,12 @@
 MainMenu = None
 
 from config import Config
-from moveOutPackage import *
-from packageState import *
-from program import *
-from utils import *
-from menuMgr import *
+from moveOutPackage import MoveOutPackage
+from packageState import PackageState
+from program import Program
+from utils import Utils
+from menuMgr import MenuMgr, KeyAction, Menu
+
 
 class MainMenu:
     def getCandidateProjects() -> str:
@@ -16,7 +17,7 @@ class MainMenu:
         for i in range(projectNum):
             byname = Config.projectPaths[i].byname
             if i == Program.curProjectIndex:
-                byname = color(byname, 34)
+                byname = Utils.color(byname, 34)
             s += byname
             if i != projectNum - 1:
                 s += " | "
@@ -26,13 +27,13 @@ class MainMenu:
         projectPath = Config.projectPaths[Program.curProjectIndex]
         s = "\n"
 
-        s += SPLITER + "\n"
+        s += Utils.SPLITER + "\n"
 
         # Unity项目候选
         s += MainMenu.getCandidateProjects()
 
         # Unity项目路径
-        byname = color(projectPath.byname, 34)
+        byname = Utils.color(projectPath.byname, 34)
         s += "[Unity项目路径]\t\t" + byname + " " + projectPath.path + "\n"
 
         # RenderFramework路径
@@ -40,18 +41,17 @@ class MainMenu:
 
         # Package位置
         if PackageState.inCache:
-            packagePosition = color("Cache", 32)
+            packagePosition = Utils.color("Cache", 32)
             if not PackageState.exists:
-                packagePosition += color("（不存在本地文件）", 35)
+                packagePosition += Utils.color("（不存在本地文件）", 35)
         else:
-            packagePosition = color("Packages", 31)
+            packagePosition = Utils.color("Packages", 31)
 
         s += "[Package位置]\t\t" + packagePosition + "\n"
 
         # Package版本
-        s += "[Package版本]\t\t" + getPackageVersionStr(PackageState.version, 33) + "\n"
+        s += "[Package版本]\t\t" + Utils.getPackageVersionStr(PackageState.version, 33) + "\n"
         print(s)
-
 
     def getMenu() -> Menu:
         return Menu(
@@ -59,9 +59,7 @@ class MainMenu:
             [
                 KeyAction("w", "重新读取项目信息", None),
                 KeyAction("v", "切换工程", Program.switchProjectIndex),
-                KeyAction(
-                    "a", "移出Package", MoveOutPackage.trySwitchMoveOutPackageMenu()
-                ),
-                KeyAction("q", "退出", exitApplication),
+                KeyAction("a", "移出Package", MoveOutPackage.trySwitchMoveOutPackageMenu),
+                KeyAction("q", "退出", Utils.exitApplication),
             ],
         )

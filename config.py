@@ -2,7 +2,7 @@ Config = None
 ProjectPath = None
 
 import json
-from utils import *
+from utils import Utils
 
 class ProjectPath:
     def __init__(self, byname : str, path : str):
@@ -15,7 +15,7 @@ class Config:
 
     def loadConfig():
         try:
-            with open(getConfigJsonPath()) as f:
+            with open(Utils.getConfigJsonPath()) as f:
                 configJson = json.load(f)
         except Exception as e:
             raise Exception("读取config.json文件失败: " + str(e))

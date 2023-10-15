@@ -2,18 +2,18 @@ PackageState = None
 
 import json
 import os
-from utils import *
+from utils import Utils, PackageVersion
 
 class PackageState:
     inCache = False
     path = ""
     exists = False
-    version = PackageVersion.getUnavailable()
+    version = None
 
     def analyzePackageState(projectPath):
 
         # 判断packages-lock.json中指明的package版本和位置
-        packagesLockJsonPath = getPackagesLockJsonPath(projectPath)
+        packagesLockJsonPath = Utils.getPackagesLockJsonPath(projectPath)
 
         if(not os.path.exists(packagesLockJsonPath)):
             raise Exception("找不到指定工程的packages-lock.json文件: " + packagesLockJsonPath)
@@ -24,17 +24,13 @@ class PackageState:
         except Exception as e:
             raise Exception("读取packages-lock.json文件失败: " + str(e))
 
-        global inCache
-        global version
         try:
-            inCache = packagesLockJson["dependencies"][PACKAGE_NAME]["source"] != "embedded"
-            version = getPackageVersion(packagesLockJson["dependencies"][PACKAGE_NAME]["version"])
+            PackageState.inCache = packagesLockJson["dependencies"][Utils.PACKAGE_NAME]["source"] != "embedded"
+            PackageState.version = Utils.getPackageVersion(packagesLockJson["dependencies"][Utils.PACKAGE_NAME]["version"])
         except Exception as e:
             raise Exception("packages-lock.json格式错误，建议使用Unity重新生成")
 
-        global path
-        path = getPackagePath(projectPath, inCache, version)
+        PackageState.path = Utils.getPackagePath(projectPath, PackageState.inCache, PackageState.version)
         # 检查路径下的package是否可用
         # 需要package文件夹内的package.json存在
-        global exists
-        exists = os.path.exists(getPackageJsonPath(path))
+        PackageState.exists = os.path.exists(Utils.getPackageJsonPath(PackageState.path))

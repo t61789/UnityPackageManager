@@ -1,8 +1,11 @@
 A = None
 
-from m import M
+from b import B
 
 class A:
 
-    def Say0():
-        print(M.key)
+    def SaySelf():
+        print(123)
+
+    def SayOther():
+        B.SaySelf()

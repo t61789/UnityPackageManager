@@ -1,5 +1,11 @@
-import a
+B = None
+
+from a import A
+
 class B:
-    key = 312
-    def Say(self, aIns : a.A):
-        print(aIns.key)
+
+    def SaySelf():
+        print(4544)
+
+    def SayOther():
+        A.SaySelf()

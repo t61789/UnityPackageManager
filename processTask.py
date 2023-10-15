@@ -1,6 +1,6 @@
 import queue
 from typing import Callable
-from utils import *
+from utils import Utils
 import threading
 import time
 
@@ -48,15 +48,15 @@ class ProcessTask:
 
     def drawRunningMark(self, drawedNum, runningMark="-"):
         moveLength = self.maxDrawedNum - drawedNum + 2
-        printInline("\x1b[" + str(moveLength) + "C")
-        printInline(runningMark)
-        printInline("\x1b[" + str(moveLength + 1) + "D")
+        Utils.printInline("\x1b[" + str(moveLength) + "C")
+        Utils.printInline(runningMark)
+        Utils.printInline("\x1b[" + str(moveLength + 1) + "D")
 
     def drawProgressBarBoarder(self):
-        printInline("[")
-        printInline("\x1b[" + str(self.maxDrawedNum) + "C")
-        printInline("]")
-        printInline("\x1b[" + str(self.maxDrawedNum + 1) + "D")
+        Utils.printInline("[")
+        Utils.printInline("\x1b[" + str(self.maxDrawedNum) + "C")
+        Utils.printInline("]")
+        Utils.printInline("\x1b[" + str(self.maxDrawedNum + 1) + "D")
 
     def clearRunningMark(self, drawedNum):
         self.drawRunningMark(drawedNum, " ")
@@ -90,14 +90,14 @@ class ProcessTask:
 
             targetDrawNum = int(process * self.maxDrawedNum)
             while drawedNum < targetDrawNum:
-                printInline("#")
+                Utils.printInline("#")
                 drawedNum += 1
 
             if self.hasProcessDone():
                 break
 
         self.clearRunningMark(self.maxDrawedNum)
-        printInline("\x1b[" + str(self.maxDrawedNum - drawedNum + 1) + "C")
+        Utils.printInline("\x1b[" + str(self.maxDrawedNum - drawedNum + 1) + "C")
         taskThread.join()
 
         if not self.exceptionQueue.empty():

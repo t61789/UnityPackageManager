@@ -1,54 +1,54 @@
 MoveOutPackage = None
 
 import processTask
-from utils import *
+from utils import Utils, Step
 import json
-from packageState import *
-from menuMgr import *
-from mainMenu import *
-from program import *
+from packageState import PackageState
+from menuMgr import MenuMgr, KeyAction, Menu
+from mainMenu import MainMenu
+from program import Program
 
 class MoveOutPackage:
     def addFrameworkChangeToGit(addPackagesLockAlso: bool = False) -> bool:
-        printInline("添加项目内RenderFramework改动到Git: ")
+        Utils.printInline("添加项目内RenderFramework改动到Git: ")
 
         stderr = ""
 
         def exe(setProcess):
             setProcess(0.5)
-            packagePath = getPackagePath(
+            packagePath = Utils.getPackagePath(
                 Program.getCurProjectPath(), False, PackageState.version
             )
             global stderr
-            _, stderr = executeGitCommand(["add", packagePath + "/*"])
+            _, stderr = Utils.executeGitCommand(["add", packagePath + "/*"])
 
             if "error:" not in stderr and addPackagesLockAlso:
-                packagesPath = getUnityPackagesPath(Program.getCurProjectPath())
-                _, stderr = executeGitCommand(["add", packagesPath + "/packages-lock.json"])
+                packagesPath = Utils.getUnityPackagesPath(Program.getCurProjectPath())
+                _, stderr = Utils.executeGitCommand(["add", packagesPath + "/packages-lock.json"])
 
             setProcess(1)
 
         processTask.run(exe)
 
         if "error:" not in stderr:
-            print(color("成功", 32))
+            print(Utils.color("成功", 32))
             return True
         else:
-            print(color("失败: ", 31))
+            print(Utils.color("失败: ", 31))
             print(stderr)
             return False
 
 
     def modifyPackageLockJson(setProcess):
-        packagesLockJsonPath = getPackagesLockJsonPath(Program.getCurProjectPath())
+        packagesLockJsonPath = Utils.getPackagesLockJsonPath(Program.getCurProjectPath())
         with open(packagesLockJsonPath) as f:
             packagesLockJson = json.load(f)
 
         setProcess(0.3)
 
-        packageJson = packagesLockJson["dependencies"][PACKAGE_NAME]
+        packageJson = packagesLockJson["dependencies"][Utils.PACKAGE_NAME]
         packageJson["source"] = "embedded"
-        packageJson["version"] = "file:" + getPackageFullName(PackageState.version)
+        packageJson["version"] = "file:" + Utils.getPackageFullName(PackageState.version)
         packageJson["depth"] = 0
         del packageJson["url"]
 
@@ -68,10 +68,10 @@ class MoveOutPackage:
         # 移出文件 ------------------------------------------
         def step0():
             try:
-                src = getPackagePath(Program.getCurProjectPath(), True, PackageState.version)
-                dest = getPackagePath(Program.getCurProjectPath(), False, PackageState.version)
+                src = Utils.getPackagePath(Program.getCurProjectPath(), True, PackageState.version)
+                dest = Utils.getPackagePath(Program.getCurProjectPath(), False, PackageState.version)
                 processTask.run(
-                    lambda setProcess: copyDirectory(src, dest, True, setProcess)
+                    lambda setProcess: Utils.copyDirectory(src, dest, True, setProcess)
                 )
                 return None
             except Exception as e:
@@ -104,7 +104,7 @@ class MoveOutPackage:
             def step2():
                 def commit(setProcess):
                     setProcess(0.5)
-                    executeGitCommand(["commit", "-m", "feat：【RF】移出包体"])
+                    Utils.executeGitCommand(["commit", "-m", "feat：【RF】移出包体"])
                     setProcess(1)
 
                 try:
@@ -117,7 +117,7 @@ class MoveOutPackage:
                 MenuMgr.switchMenu(MainMenu.getMenu())
                 return
 
-        print(color("移出完成", 32))
+        print(Utils.color("移出完成", 32))
         MenuMgr.switchMenu(MainMenu.getMenu())
 
 
@@ -127,7 +127,7 @@ class MoveOutPackage:
             [
                 KeyAction("a", "不提交", MoveOutPackage.moveOutPackage),
                 KeyAction("s", "提交", lambda: MoveOutPackage.moveOutPackage(True)),
-                KeyAction("q", "返回", MenuMgr.switchMenu(MainMenu.getMenu())),
+                KeyAction("q", "返回", lambda: MenuMgr.switchMenu(MainMenu.getMenu())),
             ],
             1,
         )
@@ -137,11 +137,11 @@ class MoveOutPackage:
         print()
 
         if not PackageState.inCache:
-            print(color("Package不在Cache中，无需移出", 33))
+            print(Utils.color("Package不在Cache中，无需移出", 33))
             return
 
         if not PackageState.exists:
-            print(color("Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载", 33))
+            print(Utils.color("Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载", 33))
             return
 
         MenuMgr.switchMenu(MoveOutPackage.getMenu())
