@@ -118,9 +118,7 @@ menuMgr.registerMenu(
         [
             menuMgr.KeyAction("a", "不提交", moveOutPackage),
             menuMgr.KeyAction("s", "提交", lambda: moveOutPackage(True)),
-            menuMgr.KeyAction(
-                "q", "返回", lambda: menuMgr.switchMenu(menuMgr.MAIN_MENU)
-            ),
+            menuMgr.KeyAction("q", "返回", lambda: menuMgr.switchMenu(menuMgr.MAIN_MENU)),
         ],
         1,
     ),

@@ -30,8 +30,16 @@ def initializeTick():
         utils.log("分析项目结构出错：" + str(e), utils.LogType.Error)
         menuMgr.switchMenu(menuMgr.PACKAGE_ERROR_MENU)
 
+
 def executeGitCommand(args: [str]):
     return utils.executeCmd(["git"] + args, program.getCurProjectPath())
+
+
+def executeGitCommandWithExp(args: [str]):
+    _, stderr = utils.executeCmd(["git"] + args, program.getCurProjectPath())
+    if "error: " in stderr:
+        raise Exception(stderr)
+
 
 menuMgr.registerMenu(
     menuMgr.CONFIG_ERROR_MENU,

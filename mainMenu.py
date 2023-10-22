@@ -4,6 +4,7 @@ import program
 import packageState
 import menuMgr
 import moveOutPackage
+import modifyPackageVersion
 
 
 def getCandidateProjects() -> str:
@@ -59,7 +60,14 @@ menuMgr.registerMenu(
         [
             menuMgr.KeyAction("w", "重新读取项目信息", None),
             menuMgr.KeyAction("v", "切换工程", program.switchProjectIndex),
-            menuMgr.KeyAction("a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu),
+            menuMgr.KeyAction(
+                "a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu
+            ),
+            menuMgr.KeyAction(
+                "r",
+                "修改Package版本",
+                lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU),
+            ),
             menuMgr.KeyAction("q", "退出", utils.exitApplication),
         ],
     ),

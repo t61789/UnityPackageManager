@@ -6,6 +6,7 @@ import subprocess
 import sys
 from typing import Callable
 
+
 class LogType(enum.Enum):
     Log = (1,)
     Warning = (2,)
@@ -21,16 +22,17 @@ class PackageVersion:
     def getUnavailable():
         return PackageVersion(-1, -1, -1)
 
+
 PACKAGE_NAME = "com.unity.burst"
 SPLITER = "[-------------------------------------------------------------]"
+
 
 def exitApplication():
     sys.exit(0)
 
+
 def executeCmd(args: [str], cwd: str) -> [str, str]:
-    c = subprocess.Popen(
-        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd
-    )
+    c = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     # c = subprocess.Popen(["git", "show"], stdout = subprocess.PIPE, cwd="D:\\UnityProjects\\PJGRASS")
 
     stdout = ""
@@ -49,6 +51,7 @@ def executeCmd(args: [str], cwd: str) -> [str, str]:
     c.wait()
 
     return stdout, stderr
+
 
 def color(s: str, colorCode: int or None) -> str:
     # 字体颜色
@@ -73,6 +76,7 @@ def color(s: str, colorCode: int or None) -> str:
     if colorCode is None:
         return s
     return "\x1b[" + str(colorCode) + "m" + s + "\x1b[0m"
+
 
 def copyDirectory(src: str, dst: str, deleteSrc: bool = False, setProcess=None):
     dirs = []
@@ -102,22 +106,39 @@ def copyDirectory(src: str, dst: str, deleteSrc: bool = False, setProcess=None):
     if deleteSrc:
         shutil.rmtree(src)
 
+
 def printInline(char):
     print(char, end="", flush=True)
+
+
+def getIntent(intent: int):
+    intendStr = ""
+    for i in range(intent):
+        intendStr += "  "
+    return intendStr
+
 
 def log(message: str, type: LogType = LogType.Log):
     if type == LogType.Error:
         message = "[\x1b[41mERROR\x1b[0m]" + message
     print(message)
 
+
 def getUnityPackagesPath(projectPath: str) -> str:
     return projectPath + "/Packages"
+
 
 def getUnityPackageCachePath(projectPath: str) -> str:
     return projectPath + "/Library/PackageCache"
 
+
 def getPackagesLockJsonPath(projectPath: str) -> str:
     return getUnityPackagesPath(projectPath) + "/packages-lock.json"
+
+
+def getManifestJsonPath(projectPath: str) -> str:
+    return getUnityPackagesPath(projectPath) + "/manifest.json"
+
 
 def getPackageVersionStr(packageVersion: PackageVersion, color: int = -1) -> str:
     colorPrefix = "" if color < 0 else ("\x1b[" + str(color) + "m")
@@ -133,17 +154,18 @@ def getPackageVersionStr(packageVersion: PackageVersion, color: int = -1) -> str
         + colorPostFix
     )
 
+
 def getPackageVersion(packagePath: str) -> PackageVersion:
     match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", packagePath)
     if not match:
         return PackageVersion.getUnavailable()
 
-    return PackageVersion(
-        int(match.group(1)), int(match.group(2)), int(match.group(3))
-    )
+    return PackageVersion(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
 
 def getPackageFullName(packageVersion: PackageVersion) -> str:
     return PACKAGE_NAME + "@" + getPackageVersionStr(packageVersion)
+
 
 def getPackagePath(
     projectPath: str, inCache: bool, packageVersion: PackageVersion
@@ -158,9 +180,10 @@ def getPackagePath(
             getUnityPackagesPath(projectPath), getPackageFullName(packageVersion)
         )
 
+
 def getPackageJsonPath(packagePath: str) -> str:
     return packagePath + "/package.json"
 
+
 def getConfigJsonPath() -> str:
     return "./config.json"
-

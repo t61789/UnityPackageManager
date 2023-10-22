@@ -2,6 +2,7 @@
 import program
 import moveOutPackage
 import mainMenu
+import modifyPackageVersion
 
 menuMgr.onTickStart(program.initializeTick)
 
