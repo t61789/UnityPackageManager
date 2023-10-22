@@ -1,11 +1,4 @@
-A = None
+import c
 
-from b import B
-
-class A:
-
-    def SaySelf():
-        print(123)
-
-    def SayOther():
-        B.SaySelf()
+def printM():
+    print(c.menu["key"])

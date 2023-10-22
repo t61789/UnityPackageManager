@@ -1,65 +1,66 @@
-MainMenu = None
-
-from config import Config
-from moveOutPackage import MoveOutPackage
-from packageState import PackageState
-from program import Program
-from utils import Utils
-from menuMgr import MenuMgr, KeyAction, Menu
+import utils
+import config
+import program
+import packageState
+import menuMgr
+import moveOutPackage
 
 
-class MainMenu:
-    def getCandidateProjects() -> str:
-        projectNum = len(Config.projectPaths)
-        if projectNum == 0:
-            return None
-        s = "[Unity项目候选]\t\t"
-        for i in range(projectNum):
-            byname = Config.projectPaths[i].byname
-            if i == Program.curProjectIndex:
-                byname = Utils.color(byname, 34)
-            s += byname
-            if i != projectNum - 1:
-                s += " | "
-        return s + "\n"
+def getCandidateProjects() -> str:
+    projectNum = len(config.projectPaths)
+    if projectNum == 0:
+        return None
+    s = "[Unity项目候选]\t\t"
+    for i in range(projectNum):
+        byname = config.projectPaths[i].byname
+        if i == program.curProjectIndex:
+            byname = utils.color(byname, 34)
+        s += byname
+        if i != projectNum - 1:
+            s += " | "
+    return s + "\n"
 
-    def getMainMenuHeader() -> str:
-        projectPath = Config.projectPaths[Program.curProjectIndex]
-        s = "\n"
 
-        s += Utils.SPLITER + "\n"
+def getMainMenuHeader() -> str:
+    projectPath = config.projectPaths[program.curProjectIndex]
+    s = "\n"
 
-        # Unity项目候选
-        s += MainMenu.getCandidateProjects()
+    s += utils.SPLITER + "\n"
 
-        # Unity项目路径
-        byname = Utils.color(projectPath.byname, 34)
-        s += "[Unity项目路径]\t\t" + byname + " " + projectPath.path + "\n"
+    # Unity项目候选
+    s += getCandidateProjects()
 
-        # RenderFramework路径
-        s += "[RenderFramework路径]\t" + Config.rfPath + "\n"
+    # Unity项目路径
+    byname = utils.color(projectPath.byname, 34)
+    s += "[Unity项目路径]\t\t" + byname + " " + projectPath.path + "\n"
 
-        # Package位置
-        if PackageState.inCache:
-            packagePosition = Utils.color("Cache", 32)
-            if not PackageState.exists:
-                packagePosition += Utils.color("（不存在本地文件）", 35)
-        else:
-            packagePosition = Utils.color("Packages", 31)
+    # RenderFramework路径
+    s += "[RenderFramework路径]\t" + config.rfPath + "\n"
 
-        s += "[Package位置]\t\t" + packagePosition + "\n"
+    # Package位置
+    if packageState.inCache:
+        packagePosition = utils.color("Cache", 32)
+        if not packageState.exists:
+            packagePosition += utils.color("（不存在本地文件）", 35)
+    else:
+        packagePosition = utils.color("Packages", 31)
 
-        # Package版本
-        s += "[Package版本]\t\t" + Utils.getPackageVersionStr(PackageState.version, 33) + "\n"
-        print(s)
+    s += "[Package位置]\t\t" + packagePosition + "\n"
 
-    def getMenu() -> Menu:
-        return Menu(
-            MainMenu.getMainMenuHeader,
-            [
-                KeyAction("w", "重新读取项目信息", None),
-                KeyAction("v", "切换工程", Program.switchProjectIndex),
-                KeyAction("a", "移出Package", MoveOutPackage.trySwitchMoveOutPackageMenu),
-                KeyAction("q", "退出", Utils.exitApplication),
-            ],
-        )
+    # Package版本
+    s += "[Package版本]\t\t" + utils.getPackageVersionStr(packageState.version, 33) + "\n"
+    print(s)
+
+
+menuMgr.registerMenu(
+    menuMgr.MAIN_MENU,
+    menuMgr.Menu(
+        getMainMenuHeader,
+        [
+            menuMgr.KeyAction("w", "重新读取项目信息", None),
+            menuMgr.KeyAction("v", "切换工程", program.switchProjectIndex),
+            menuMgr.KeyAction("a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu),
+            menuMgr.KeyAction("q", "退出", utils.exitApplication),
+        ],
+    ),
+)

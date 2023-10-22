@@ -1,147 +1,127 @@
-MoveOutPackage = None
-
 import processTask
-from utils import Utils, Step
+import utils
 import json
-from packageState import PackageState
-from menuMgr import MenuMgr, KeyAction, Menu
-from mainMenu import MainMenu
-from program import Program
-
-class MoveOutPackage:
-    def addFrameworkChangeToGit(addPackagesLockAlso: bool = False) -> bool:
-        Utils.printInline("添加项目内RenderFramework改动到Git: ")
-
-        stderr = ""
-
-        def exe(setProcess):
-            setProcess(0.5)
-            packagePath = Utils.getPackagePath(
-                Program.getCurProjectPath(), False, PackageState.version
-            )
-            global stderr
-            _, stderr = Utils.executeGitCommand(["add", packagePath + "/*"])
-
-            if "error:" not in stderr and addPackagesLockAlso:
-                packagesPath = Utils.getUnityPackagesPath(Program.getCurProjectPath())
-                _, stderr = Utils.executeGitCommand(["add", packagesPath + "/packages-lock.json"])
-
-            setProcess(1)
-
-        processTask.run(exe)
-
-        if "error:" not in stderr:
-            print(Utils.color("成功", 32))
-            return True
-        else:
-            print(Utils.color("失败: ", 31))
-            print(stderr)
-            return False
+import packageState
+import menuMgr
+import program
 
 
-    def modifyPackageLockJson(setProcess):
-        packagesLockJsonPath = Utils.getPackagesLockJsonPath(Program.getCurProjectPath())
-        with open(packagesLockJsonPath) as f:
-            packagesLockJson = json.load(f)
+def addFrameworkChangeToGit(setProcess, addPackagesLockAlso: bool = False):
+    setProcess(0.5)
+    packagePath = utils.getPackagePath(
+        program.getCurProjectPath(), False, packageState.version
+    )
+    _, stderr = program.executeGitCommand(["add", packagePath + "/*"])
 
-        setProcess(0.3)
+    if "error: " in stderr:
+        raise Exception(stderr)
 
-        packageJson = packagesLockJson["dependencies"][Utils.PACKAGE_NAME]
-        packageJson["source"] = "embedded"
-        packageJson["version"] = "file:" + Utils.getPackageFullName(PackageState.version)
-        packageJson["depth"] = 0
-        del packageJson["url"]
-
-        setProcess(0.6)
-
-        with open(packagesLockJsonPath, "w", newline="\n") as f:
-            f.write(json.dumps(packagesLockJson, indent=2))
-            f.write("\n")
-            f.flush()
-
-        setProcess(1)
-
-
-    def moveOutPackage(commit: bool = False):
-        print()
-
-        # 移出文件 ------------------------------------------
-        def step0():
-            try:
-                src = Utils.getPackagePath(Program.getCurProjectPath(), True, PackageState.version)
-                dest = Utils.getPackagePath(Program.getCurProjectPath(), False, PackageState.version)
-                processTask.run(
-                    lambda setProcess: Utils.copyDirectory(src, dest, True, setProcess)
-                )
-                return None
-            except Exception as e:
-                return str(e)
-
-        if not Step("移出Package文件: ", step0).execute():
-            MenuMgr.switchMenu(MainMenu.getMenu())
-            return
-
-        # 修改json ------------------------------------------
-        def step1():
-            try:
-                processTask.run(MoveOutPackage.modifyPackageLockJson)
-                return None
-            except Exception as e:
-                return str(e)
-
-        if not Step("修改packages-lock.json配置: ", step1).execute():
-            MenuMgr.switchMenu(MainMenu.getMenu())
-            return
-
-        # 将修改添加到git ------------------------------------------
-        if not MoveOutPackage.addFrameworkChangeToGit(True):
-            MenuMgr.switchMenu(MainMenu.getMenu())
-            return
-
-        # 提交 ------------------------------------------
-        if commit:
-
-            def step2():
-                def commit(setProcess):
-                    setProcess(0.5)
-                    Utils.executeGitCommand(["commit", "-m", "feat：【RF】移出包体"])
-                    setProcess(1)
-
-                try:
-                    processTask.run(commit)
-                    return None
-                except Exception as e:
-                    return str(e)
-
-            if not Step("提交修改到git: ", step2).execute():
-                MenuMgr.switchMenu(MainMenu.getMenu())
-                return
-
-        print(Utils.color("移出完成", 32))
-        MenuMgr.switchMenu(MainMenu.getMenu())
-
-
-    def getMenu():
-        return Menu(
-            "是否提交修改？",
-            [
-                KeyAction("a", "不提交", MoveOutPackage.moveOutPackage),
-                KeyAction("s", "提交", lambda: MoveOutPackage.moveOutPackage(True)),
-                KeyAction("q", "返回", lambda: MenuMgr.switchMenu(MainMenu.getMenu())),
-            ],
-            1,
+    if addPackagesLockAlso:
+        packagesPath = utils.getUnityPackagesPath(program.getCurProjectPath())
+        _, stderr = program.executeGitCommand(
+            ["add", packagesPath + "/packages-lock.json"]
         )
 
+    setProcess(1)
 
-    def trySwitchMoveOutPackageMenu():
-        print()
 
-        if not PackageState.inCache:
-            print(Utils.color("Package不在Cache中，无需移出", 33))
+def modifyPackageLockJson(setProcess):
+    packagesLockJsonPath = utils.getPackagesLockJsonPath(program.getCurProjectPath())
+    with open(packagesLockJsonPath) as f:
+        packagesLockJson = json.load(f)
+
+    setProcess(0.3)
+
+    packageJson = packagesLockJson["dependencies"][utils.PACKAGE_NAME]
+    packageJson["source"] = "embedded"
+    packageJson["version"] = "file:" + utils.getPackageFullName(packageState.version)
+    packageJson["depth"] = 0
+    del packageJson["url"]
+
+    setProcess(0.6)
+
+    with open(packagesLockJsonPath, "w", newline="\n") as f:
+        f.write(json.dumps(packagesLockJson, indent=2))
+        f.write("\n")
+        f.flush()
+
+    setProcess(1)
+
+
+def moveOutPackage(commit: bool = False):
+    print()
+
+    # 移出文件 ------------------------------------------
+    def step0(setProcess):
+        src = utils.getPackagePath(
+            program.getCurProjectPath(), True, packageState.version
+        )
+        dest = utils.getPackagePath(
+            program.getCurProjectPath(), False, packageState.version
+        )
+        utils.copyDirectory(src, dest, True, setProcess)
+        return None
+
+    if not processTask.runStep("移出Package文件: ", step0):
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    # 修改json ------------------------------------------
+    if not processTask.runStep("修改packages-lock.json配置: ", modifyPackageLockJson):
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    # 将修改添加到git ------------------------------------------
+    def step2(setProcess):
+        addFrameworkChangeToGit(setProcess, True)
+
+    if not processTask.runStep("将修改添加到git: ", step2):
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    # 提交 ------------------------------------------
+    if commit:
+
+        def step3(setProcess):
+            setProcess(0.5)
+            _, stderr = program.executeGitCommand(["commit", "-m", "feat：【RF】移出包体"])
+            if "error: " in stderr:
+                raise Exception(stderr)
+            setProcess(1)
+
+        if not processTask.runStep("提交修改到git: ", step3):
+            menuMgr.switchMenu(menuMgr.MAIN_MENU)
             return
 
-        if not PackageState.exists:
-            print(Utils.color("Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载", 33))
-            return
+    print(utils.color("移出完成", 32))
+    menuMgr.switchMenu(menuMgr.MAIN_MENU)
 
-        MenuMgr.switchMenu(MoveOutPackage.getMenu())
+
+def trySwitchMoveOutPackageMenu():
+    print()
+
+    if not packageState.inCache:
+        print(utils.color("Package不在Cache中，无需移出", 33))
+        return
+
+    if not packageState.exists:
+        print(utils.color("Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载", 33))
+        return
+
+    menuMgr.switchMenu(menuMgr.MOVE_OUT_PACKAGE_MENU)
+
+
+menuMgr.registerMenu(
+    menuMgr.MOVE_OUT_PACKAGE_MENU,
+    menuMgr.Menu(
+        "是否提交修改？",
+        [
+            menuMgr.KeyAction("a", "不提交", moveOutPackage),
+            menuMgr.KeyAction("s", "提交", lambda: moveOutPackage(True)),
+            menuMgr.KeyAction(
+                "q", "返回", lambda: menuMgr.switchMenu(menuMgr.MAIN_MENU)
+            ),
+        ],
+        1,
+    ),
+)

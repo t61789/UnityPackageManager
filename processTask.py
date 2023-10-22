@@ -1,9 +1,8 @@
 import queue
 from typing import Callable
-from utils import Utils
 import threading
 import time
-
+import utils
 
 class ProcessTask:
     def __init__(self, action: Callable[[float], None], maxDrawedNum: int = 20):
@@ -48,15 +47,15 @@ class ProcessTask:
 
     def drawRunningMark(self, drawedNum, runningMark="-"):
         moveLength = self.maxDrawedNum - drawedNum + 2
-        Utils.printInline("\x1b[" + str(moveLength) + "C")
-        Utils.printInline(runningMark)
-        Utils.printInline("\x1b[" + str(moveLength + 1) + "D")
+        utils.printInline("\x1b[" + str(moveLength) + "C")
+        utils.printInline(runningMark)
+        utils.printInline("\x1b[" + str(moveLength + 1) + "D")
 
     def drawProgressBarBoarder(self):
-        Utils.printInline("[")
-        Utils.printInline("\x1b[" + str(self.maxDrawedNum) + "C")
-        Utils.printInline("]")
-        Utils.printInline("\x1b[" + str(self.maxDrawedNum + 1) + "D")
+        utils.printInline("[")
+        utils.printInline("\x1b[" + str(self.maxDrawedNum) + "C")
+        utils.printInline("]")
+        utils.printInline("\x1b[" + str(self.maxDrawedNum + 1) + "D")
 
     def clearRunningMark(self, drawedNum):
         self.drawRunningMark(drawedNum, " ")
@@ -75,8 +74,8 @@ class ProcessTask:
                 self.exceptionQueue,
                 self.action,
                 self.setProcessDone,
-                self.setProgressionVal
-            )
+                self.setProgressionVal,
+            ),
         )
         taskThread.start()
         drawedNum = 0
@@ -90,14 +89,14 @@ class ProcessTask:
 
             targetDrawNum = int(process * self.maxDrawedNum)
             while drawedNum < targetDrawNum:
-                Utils.printInline("#")
+                utils.printInline("#")
                 drawedNum += 1
 
             if self.hasProcessDone():
                 break
 
         self.clearRunningMark(self.maxDrawedNum)
-        Utils.printInline("\x1b[" + str(self.maxDrawedNum - drawedNum + 1) + "C")
+        utils.printInline("\x1b[" + str(self.maxDrawedNum - drawedNum + 1) + "C")
         taskThread.join()
 
         if not self.exceptionQueue.empty():
@@ -106,3 +105,21 @@ class ProcessTask:
 
 def run(action: Callable[[float], None], maxDrawedNum: int = 20):
     ProcessTask(action).run()
+
+def runStep(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
+    utils.printInline(name)
+
+    errorStr = None
+    try:
+        run(action)
+    except Exception as e:
+        errorStr = str(e)
+    
+    if errorStr == None or errorStr == "":
+        print(utils.color(" 完成", 32))
+        return True
+    else:
+        print(utils.color(" 失败", 31))
+        print(errorStr)
+        return False
+    

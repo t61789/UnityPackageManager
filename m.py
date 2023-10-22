@@ -1,3 +1,5 @@
-from a import A
+import a
+#import b
 
-A.SayOther()
+a.printM()
+

@@ -1,9 +1,9 @@
-﻿from mainMenu import MainMenu
-from program import Program
-from menuMgr import MenuMgr
+﻿import menuMgr
+import program
+import moveOutPackage
+import mainMenu
 
-MenuMgr.onTickStart(Program.initializeTick)
+menuMgr.onTickStart(program.initializeTick)
 
-MenuMgr.switchMenu(MainMenu.getMenu())
-#MenuMgr.startMenu()
-Program.initializeTick()
+menuMgr.switchMenu(menuMgr.MAIN_MENU)
+menuMgr.startMenu()
