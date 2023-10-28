@@ -1,5 +1,4 @@
-import a
-#import b
+import readchar
 
-a.printM()
-
+c = readchar.readchar()
+print(c)

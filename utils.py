@@ -19,6 +19,9 @@ class PackageVersion:
         self.levelCode = levelCode
         self.versionCode = versionCode
 
+    def __eq__(self, other):
+        return self.unityCode == other.unityCode and self.levelCode == other.levelCode and self.versionCode == other.versionCode
+
     def getUnavailable():
         return PackageVersion(-1, -1, -1)
 
@@ -105,6 +108,37 @@ def copyDirectory(src: str, dst: str, deleteSrc: bool = False, setProcess=None):
 
     if deleteSrc:
         shutil.rmtree(src)
+
+
+def clearDirectory(path: str, setProcess):
+    dirs = []
+    files = []
+    if not os.path.exists(path):
+        return
+
+    for element in os.listdir(path):
+        if element == ".git":
+            continue
+
+        p = os.path.join(path, element)
+        if os.path.isdir(p):
+            dirs.append(p)
+        else:
+            files.append(p)
+
+    size = len(dirs) + len(files)
+    count = 0
+    for file in files:
+        os.remove(file)
+        count += 1
+        if setProcess is not None:
+            setProcess(count / size)
+    for dir in dirs:
+        if os.path.exists(dir):
+            shutil.rmtree(dir)
+        count += 1
+        if setProcess is not None:
+            setProcess(count / size)
 
 
 def printInline(char):

@@ -1,12 +1,20 @@
 import json
 import os
 import utils
+import config
 
 inCache = False
 path = ""
 exists = False
-version = None
+version = utils.PackageVersion.getUnavailable()
+rfVersion = utils.PackageVersion.getUnavailable()
 
+def getPackageVersion(packagePath: str) -> utils.PackageVersion:
+    packageJsonPath = os.path.join(packagePath, "package.json")
+    with open(packageJsonPath) as f:
+        packageJson = json.load(f)
+    return utils.getPackageVersion(packageJson["version"])
+    
 
 def findAvailablePackageDirectories(projectPath: str, inCache: bool) -> list:
     availablePackageDirectories = []
@@ -89,3 +97,11 @@ def analyzePackageState(projectPath):
     version = maxVersion
     path = maxVersionDirPath
     exists = True
+
+    # 判断RF工程版本
+    global rfVersion
+    try:
+        rfVersion = getPackageVersion(config.rfPath)
+    except:
+        raise Exception("读取RF工程版本失败，请检查RF工程配置是否正确")
+

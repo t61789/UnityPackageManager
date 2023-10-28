@@ -5,6 +5,8 @@ import packageState
 import menuMgr
 import moveOutPackage
 import modifyPackageVersion
+import copyToRfProject
+import clearAllModifies
 
 
 def getCandidateProjects() -> str:
@@ -49,7 +51,17 @@ def getMainMenuHeader() -> str:
     s += "[Package位置]\t\t" + packagePosition + "\n"
 
     # Package版本
-    s += "[Package版本]\t\t" + utils.getPackageVersionStr(packageState.version, 33) + "\n"
+    s += "[BN_Package版本]\t" + utils.getPackageVersionStr(packageState.version, 33) + "\n"
+
+    # RF Package版本
+    if packageState.isVersionHigher(packageState.rfVersion, packageState.version):
+        versionCompare = utils.color(" [NEW]", 34)
+    elif packageState.rfVersion == packageState.version:
+        versionCompare = ""
+    else:
+        versionCompare = utils.color(" [OLD]", 31)
+
+    s += "[RF_Package版本]\t" + utils.getPackageVersionStr(packageState.rfVersion, 33) + versionCompare + "\n"
     print(s)
 
 
@@ -60,14 +72,10 @@ menuMgr.registerMenu(
         [
             menuMgr.KeyAction("w", "重新读取项目信息", None),
             menuMgr.KeyAction("v", "切换工程", program.switchProjectIndex),
-            menuMgr.KeyAction(
-                "a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu
-            ),
-            menuMgr.KeyAction(
-                "r",
-                "修改Package版本",
-                lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU),
-            ),
+            menuMgr.KeyAction("a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu),
+            menuMgr.KeyAction("r", "修改Package版本", lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU)),
+            menuMgr.KeyAction("g", "复制Package到RF工程", copyToRfProject.startCopy),
+            menuMgr.KeyAction("s", "清除所有修改", clearAllModifies.clearAllModifies),
             menuMgr.KeyAction("q", "退出", utils.exitApplication),
         ],
     ),

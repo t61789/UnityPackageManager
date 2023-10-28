@@ -35,10 +35,27 @@ def executeGitCommand(args: [str]):
     return utils.executeCmd(["git"] + args, program.getCurProjectPath())
 
 
+def executeGitCommandRf(args: [str]):
+    return utils.executeCmd(["git"] + args, config.rfPath)
+
+
 def executeGitCommandWithExp(args: [str]):
-    _, stderr = utils.executeCmd(["git"] + args, program.getCurProjectPath())
+    _, stderr = executeGitCommand(args)
     if "error: " in stderr:
         raise Exception(stderr)
+
+
+def executeGitCommandRfWithExp(args: [str]):
+    _, stderr = executeGitCommandRf(args)
+    if "error: " in stderr:
+        raise Exception(stderr)
+
+
+def checkWorkSpaceHasChanged(path: str) -> bool:
+    stdout, stderr = utils.executeCmd(["git", "status", "--porcelain"], path)
+    if "error: " in stderr:
+        raise Exception(stderr)
+    return len(stdout) > 0
 
 
 menuMgr.registerMenu(

@@ -37,30 +37,29 @@ CONFIG_ERROR_MENU = "configErrorMenu"
 MAIN_MENU = "mainMenu"
 MOVE_OUT_PACKAGE_MENU = "moveOutPackageMenu"
 MODIFY_PACKAGE_JSON_MENU = "modifyPackageJsonMenu"
+COPY_TO_RF_PROJECT_CONFIRM_MENU = "copyToRfProjectConfirmMenu"
 
 
-def executeKeyAction(keyName: str):
+def executeKeyAction(keyAction):
+    if keyAction.action:
+        global keyRunning
+        keyRunning = True
+        keyAction.action()
+        keyRunning = False
+
+
+def findAvailableAction(keyName: str) -> KeyAction:
     if curMenu == None or keyRunning:
-        return
+        return None
 
-    def runAction(keyAction: KeyAction):
-        if keyAction.action:
-            global keyRunning
-            keyRunning = True
-            keyAction.action()
-            keyRunning = False
-
-    executed = False
     for keyAction in curMenu.keyActions:
         if keyName == keyAction.key:
-            runAction(keyAction)
-            executed = True
-            break
+            return keyAction
 
-    if not executed:
-        if curMenu.defaultAction != None:
-            curMenu.defaultAction()
-            executed = True
+    if curMenu.defaultAction:
+        return curMenu.defaultAction
+
+    return None
 
 
 def displayMenu(menu: Menu):
@@ -109,10 +108,28 @@ def startMenu():
 
         displayMenu(curMenu)
 
-        inputKey = readchar.readkey()
-        utils.printInline(inputKey + "\n")
-        executeKeyAction(inputKey)
+        while True:
+            inputKey = readchar.readkey()
+            keyAction = findAvailableAction(inputKey)
+            if not keyAction:
+                continue
 
-        # 清除在执行命令期间输入的命令
-        while msvcrt.kbhit():
-            msvcrt.getch()
+            utils.printInline(inputKey + "\n")
+            executeKeyAction(keyAction)
+
+            # 清除在执行命令期间输入的命令
+            while msvcrt.kbhit():
+                msvcrt.getch()
+            break
+
+
+def confirmMenu(tile: str) -> bool:
+    utils.printInline(tile + " [E/Q]")
+    while True:
+        inputKey = readchar.readkey()
+        if inputKey == "e":
+            print("e")
+            return True
+        elif inputKey == "q":
+            print("q")
+            return False

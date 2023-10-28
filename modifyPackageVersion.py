@@ -6,13 +6,11 @@ import readchar
 import program
 import processTask
 import os
+import config
 
 
-def inputVersion(
-    preVersion: utils.PackageVersion, intent: int = 0
-) -> utils.PackageVersion or None:
+def inputVersion(preVersion: utils.PackageVersion) -> utils.PackageVersion or None:
     print()
-    utils.printInline(utils.getIntent(intent))
     versionStr = utils.getPackageVersionStr(preVersion)
     lastDotIndex = versionStr.rfind(".")
     versionStr = versionStr[0 : lastDotIndex + 1]
@@ -118,6 +116,8 @@ def commitChange(newVersion, setProcess):
 
 
 def modifyPackageInUnity():
+    print()
+
     if not packageState.inCache:
         print(utils.color("包不在Cache中，无法修改", 31))
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
@@ -142,15 +142,11 @@ def modifyPackageInUnity():
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
-    if not processTask.runStep(
-        "将修改添加到git: ", lambda setProcess: addJsonChangeToGit(setProcess)
-    ):
+    if not processTask.runStep("将修改添加到git: ", lambda setProcess: addJsonChangeToGit(setProcess)):
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
-    if not processTask.runStep(
-        "提交修改: ", lambda setProcess: commitChange(newVersion, setProcess)
-    ):
+    if not processTask.runStep("提交修改: ", lambda setProcess: commitChange(newVersion, setProcess)):
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
@@ -158,16 +154,67 @@ def modifyPackageInUnity():
     menuMgr.switchMenu(menuMgr.MAIN_MENU)
 
 
+def modifyPackagesJson(newVersion, setProcess):
+    setProcess(0.3)
+
+    packageJsonPath = config.rfPath + "/package.json"
+    with open(packageJsonPath, "r") as f:
+        packageJson = json.load(f)
+    packageJson["version"] = utils.getPackageVersionStr(newVersion)
+    with open(packageJsonPath, "w", newline="\r\n") as f:
+        f.write(json.dumps(packageJson, indent=2))
+        f.flush()
+
+    setProcess(1)
+
+
+def modifyPackageInRf():
+    print()
+
+    newVersion = inputVersion(packageState.rfVersion, 1)
+    if not newVersion:
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+    if newVersion == packageState.rfVersion:
+        print(utils.color("版本号未改变，取消操作", 31))
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    if not processTask.runStep("修改packages.json配置: ", lambda setProcess: modifyPackagesJson(newVersion, setProcess)):
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    def commitPackageJsonChange(newVersion, setProcess):
+        setProcess(0.1)
+        program.executeGitCommandRf(["add", config.rfPath + "/package.json"])
+        setProcess(0.6)
+        program.executeGitCommandRf(
+            [
+                "commit",
+                "-m",
+                "feat：【版本】更新至" + utils.getPackageVersionStr(newVersion),
+            ]
+        )
+        setProcess(1)
+
+    if not processTask.runStep("提交修改: ", lambda setProcess: commitPackageJsonChange(newVersion, setProcess)):
+        menuMgr.switchMenu(menuMgr.MAIN_MENU)
+        return
+
+    print(utils.color("修改成功", 32))
+    menuMgr.switchMenu(menuMgr.MAIN_MENU)
+    return
+
+
 menuMgr.registerMenu(
     menuMgr.MODIFY_PACKAGE_JSON_MENU,
     menuMgr.Menu(
         "选择要修改的包",
         [
-            menuMgr.KeyAction("r", "RF工程", None),  # TODO
+            menuMgr.KeyAction("r", "RF工程", modifyPackageInRf),
             menuMgr.KeyAction("e", "Unity工程", modifyPackageInUnity),
             menuMgr.KeyAction("q", "返回", lambda: menuMgr.switchMenu(menuMgr.MAIN_MENU)),
         ],
-        intent=1,
         newLine=True,
     ),
 )
