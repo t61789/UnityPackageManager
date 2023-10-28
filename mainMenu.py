@@ -77,6 +77,7 @@ menuMgr.registerMenu(
             menuMgr.KeyAction("g", "复制Package到RF工程", copyToRfProject.startCopy),
             menuMgr.KeyAction("s", "清除所有修改", clearAllModifies.clearAllModifies),
             menuMgr.KeyAction("q", "退出", utils.exitApplication),
+            # TODO 进阶操作
         ],
     ),
 )
