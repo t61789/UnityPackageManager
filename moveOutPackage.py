@@ -8,9 +8,7 @@ import program
 
 def addFrameworkChangeToGit(setProcess, addPackagesLockAlso: bool = False):
     setProcess(0.5)
-    packagePath = utils.getPackagePath(
-        program.getCurProjectPath(), False, packageState.version
-    )
+    packagePath = utils.getPackagePath(program.getCurProjectPath(), False, packageState.version)
     _, stderr = program.executeGitCommand(["add", packagePath + "/*"])
 
     if "error: " in stderr:
@@ -18,9 +16,7 @@ def addFrameworkChangeToGit(setProcess, addPackagesLockAlso: bool = False):
 
     if addPackagesLockAlso:
         packagesPath = utils.getUnityPackagesPath(program.getCurProjectPath())
-        _, stderr = program.executeGitCommand(
-            ["add", packagesPath + "/packages-lock.json"]
-        )
+        _, stderr = program.executeGitCommand(["add", packagesPath + "/packages-lock.json"])
 
     setProcess(1)
 
@@ -53,12 +49,8 @@ def moveOutPackage(commit: bool = False):
 
     # 移出文件 ------------------------------------------
     def step0(setProcess):
-        src = utils.getPackagePath(
-            program.getCurProjectPath(), True, packageState.version
-        )
-        dest = utils.getPackagePath(
-            program.getCurProjectPath(), False, packageState.version
-        )
+        src = utils.getPackagePath(program.getCurProjectPath(), True, packageState.version)
+        dest = utils.getPackagePath(program.getCurProjectPath(), False, packageState.version)
         utils.copyDirectory(src, dest, True, setProcess)
         return None
 
@@ -92,6 +84,16 @@ def moveOutPackage(commit: bool = False):
         if not processTask.runStep("提交修改到git: ", step3):
             menuMgr.switchMenu(menuMgr.MAIN_MENU)
             return
+
+    """
+    # 重新生成项目文件 ------------------------------------------
+    def step4(setProcess):
+        setProcess(0.1)
+        program.syncProjectFiles()
+        setProcess(1)
+
+    processTask.runStep("重新生成项目文件: ", step4)
+    """
 
     print(utils.color("移出完成", 32))
     menuMgr.switchMenu(menuMgr.MAIN_MENU)

@@ -9,12 +9,13 @@ exists = False
 version = utils.PackageVersion.getUnavailable()
 rfVersion = utils.PackageVersion.getUnavailable()
 
+
 def getPackageVersion(packagePath: str) -> utils.PackageVersion:
     packageJsonPath = os.path.join(packagePath, "package.json")
     with open(packageJsonPath) as f:
         packageJson = json.load(f)
     return utils.getPackageVersion(packageJson["version"])
-    
+
 
 def findAvailablePackageDirectories(projectPath: str, inCache: bool) -> list:
     availablePackageDirectories = []
@@ -77,26 +78,28 @@ def analyzePackageState(projectPath):
             )
             path = utils.getPackagePath(projectPath, inCache, version)
             exists = os.path.exists(utils.getPackageJsonPath(path))
-            return
     except Exception as e:
         raise Exception("packages-lock.json格式错误，建议使用Unity重新生成")
 
-    # 如果包不在Cache里，packages-lock.json中就不包含版本信息，需要去Packages文件夹下找可用的包
-    availablePackageDirectories = findAvailablePackageDirectories(projectPath, inCache)
-    if len(availablePackageDirectories) == 0:
-        raise Exception("packages-lock.json描述包在Packages内，但未找到可用的包，请使用Unity重新生成")
+    if not inCache:
+        # 如果包不在Cache里，packages-lock.json中就不包含版本信息，需要去Packages文件夹下找可用的包
+        availablePackageDirectories = findAvailablePackageDirectories(
+            projectPath, inCache
+        )
+        if len(availablePackageDirectories) == 0:
+            raise Exception("packages-lock.json描述包在Packages内，但未找到可用的包，请使用Unity重新生成")
 
-    # 取最高版本的包
-    maxVersion = utils.PackageVersion(-1, -1, -1)
-    maxVersionDirPath = ""
-    for dirPath, curVersion in availablePackageDirectories:
-        if isVersionHigher(curVersion, maxVersion):
-            maxVersion = curVersion
-            maxVersionDirPath = dirPath
+        # 取最高版本的包
+        maxVersion = utils.PackageVersion(-1, -1, -1)
+        maxVersionDirPath = ""
+        for dirPath, curVersion in availablePackageDirectories:
+            if isVersionHigher(curVersion, maxVersion):
+                maxVersion = curVersion
+                maxVersionDirPath = dirPath
 
-    version = maxVersion
-    path = maxVersionDirPath
-    exists = True
+        version = maxVersion
+        path = maxVersionDirPath
+        exists = True
 
     # 判断RF工程版本
     global rfVersion
@@ -104,4 +107,3 @@ def analyzePackageState(projectPath):
         rfVersion = getPackageVersion(config.rfPath)
     except:
         raise Exception("读取RF工程版本失败，请检查RF工程配置是否正确")
-

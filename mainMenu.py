@@ -7,6 +7,7 @@ import moveOutPackage
 import modifyPackageVersion
 import copyToRfProject
 import clearAllModifies
+import deleteShaderCache
 
 
 def getCandidateProjects() -> str:
@@ -76,6 +77,7 @@ menuMgr.registerMenu(
             menuMgr.KeyAction("r", "修改Package版本", lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU)),
             menuMgr.KeyAction("g", "复制Package到RF工程", copyToRfProject.startCopy),
             menuMgr.KeyAction("s", "清除所有修改", clearAllModifies.clearAllModifies),
+            menuMgr.KeyAction("b", "删除ShaderCache", deleteShaderCache.deleteShaderCache),
             menuMgr.KeyAction("q", "退出", utils.exitApplication),
             # TODO 进阶操作
         ],

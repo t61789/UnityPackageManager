@@ -20,13 +20,17 @@ class PackageVersion:
         self.versionCode = versionCode
 
     def __eq__(self, other):
-        return self.unityCode == other.unityCode and self.levelCode == other.levelCode and self.versionCode == other.versionCode
+        return (
+            self.unityCode == other.unityCode
+            and self.levelCode == other.levelCode
+            and self.versionCode == other.versionCode
+        )
 
     def getUnavailable():
         return PackageVersion(-1, -1, -1)
 
 
-PACKAGE_NAME = "com.unity.burst"
+PACKAGE_NAME = "com.baitian.polaris.renderframework"
 SPLITER = "[-------------------------------------------------------------]"
 
 
@@ -201,18 +205,14 @@ def getPackageFullName(packageVersion: PackageVersion) -> str:
     return PACKAGE_NAME + "@" + getPackageVersionStr(packageVersion)
 
 
-def getPackagePath(
-    projectPath: str, inCache: bool, packageVersion: PackageVersion
-) -> str:
+def getPackagePath(projectPath: str, inCache: bool, packageVersion: PackageVersion) -> str:
     if inCache:
         return os.path.join(
             getUnityPackageCachePath(projectPath),
             getPackageFullName(packageVersion),
         )
     else:
-        return os.path.join(
-            getUnityPackagesPath(projectPath), getPackageFullName(packageVersion)
-        )
+        return os.path.join(getUnityPackagesPath(projectPath), getPackageFullName(packageVersion))
 
 
 def getPackageJsonPath(packagePath: str) -> str:

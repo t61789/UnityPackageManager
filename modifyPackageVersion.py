@@ -71,9 +71,8 @@ def modifyManifestJson(packageVersion, setProcess):
         manifestJson = json.load(f)
     d = manifestJson["dependencies"]
     d[utils.PACKAGE_NAME] = utils.getPackageVersionStr(packageVersion)
-    with open(manifestJsonPath, "w", newline="\n") as f:
+    with open(manifestJsonPath, "w", newline="\r\n") as f:
         f.write(json.dumps(manifestJson, indent=2))
-        f.write("\n")
         f.flush()
 
     setProcess(1)
@@ -123,8 +122,8 @@ def modifyPackageInUnity():
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
-    newVersion = inputVersion(packageState.version, 1)
-    if newVersion == None:
+    newVersion = inputVersion(packageState.version)
+    if not newVersion:
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
@@ -171,7 +170,7 @@ def modifyPackagesJson(newVersion, setProcess):
 def modifyPackageInRf():
     print()
 
-    newVersion = inputVersion(packageState.rfVersion, 1)
+    newVersion = inputVersion(packageState.rfVersion)
     if not newVersion:
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
@@ -180,7 +179,9 @@ def modifyPackageInRf():
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 
-    if not processTask.runStep("修改packages.json配置: ", lambda setProcess: modifyPackagesJson(newVersion, setProcess)):
+    if not processTask.runStep(
+        "修改packages.json配置: ", lambda setProcess: modifyPackagesJson(newVersion, setProcess)
+    ):
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
         return
 

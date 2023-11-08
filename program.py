@@ -17,6 +17,21 @@ def getCurProjectPath():
     return config.projectPaths[curProjectIndex].path
 
 
+def syncProjectFiles():
+    return utils.executeCmd(
+        [
+            config.unityEditorPath,
+            "-projectPath",
+            getCurProjectPath(),
+            "-batchmode",
+            "-quit",
+            "-executeMethod",
+            "UnityEditor.SyncVS.SyncSolution",
+        ],
+        getCurProjectPath(),
+    )
+
+
 def initializeTick():
     try:
         config.loadConfig()

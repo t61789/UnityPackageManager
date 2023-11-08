@@ -1,13 +1,17 @@
 import json
 import utils
 
+
 class ProjectPath:
-    def __init__(self, byname : str, path : str):
+    def __init__(self, byname: str, path: str):
         self.byname = byname
         self.path = path
 
+
 projectPaths = []
 rfPath = ""
+unityEditorPath = ""
+
 
 def loadConfig():
     try:
@@ -16,7 +20,7 @@ def loadConfig():
     except Exception as e:
         raise Exception("读取config.json文件失败: " + str(e))
 
-    global projectPaths, rfPath
+    global projectPaths, rfPath, unityEditorPath
     projectPaths.clear()
     try:
         projectPathsJson = configJson["projectPaths"]
@@ -24,14 +28,15 @@ def loadConfig():
             projectPathJson = projectPathsJson[i]
             projectPath = ProjectPath(None, None)
             projectPath.byname = projectPathJson["byname"]
-            projectPath.path = projectPathJson["path"].replace('\\', '/')
+            projectPath.path = projectPathJson["path"].replace("\\", "/")
             projectPaths.append(projectPath)
-        rfPath = configJson["renderFrameworkPath"].replace('\\', '/')
+        rfPath = configJson["renderFrameworkPath"].replace("\\", "/")
+        unityEditorPath = configJson["unityEditorPath"].replace("\\", "/")
     except Exception as e:
         raise Exception("config.json格式错误")
-    
-    if(len(projectPaths) == 0):
+
+    if len(projectPaths) == 0:
         raise Exception("无指定的工程")
-    
-    if(rfPath == None or rfPath == ""):
+
+    if rfPath == None or rfPath == "":
         raise Exception("RenderFramework未指定")
