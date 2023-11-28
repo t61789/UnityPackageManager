@@ -10,6 +10,8 @@ def copyTo():
     unityProjectPath = program.getCurProjectPath()
     rfPath = config.rfPath
 
+    print()
+
     step = lambda setProcess: utils.clearDirectory(rfPath, setProcess)
     if not processTask.runStep("清空RF工程: ", step):
         menuMgr.switchMenu(menuMgr.MAIN_MENU)
