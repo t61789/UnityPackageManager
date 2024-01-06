@@ -1,4 +1,3 @@
-from typing import Callable
 import termcursor
 from rich.progress import *
 
@@ -15,7 +14,7 @@ class TimeElapsedColumnAdvance(ProgressColumn):
         return Text(str(delta)[2:10:], style="progress.elapsed")
 
 
-def runStep(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
+def run_step(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
     termcursor.hidecursor()
 
     with Progress(
@@ -26,21 +25,21 @@ def runStep(name: str, action: Callable[[Callable[[float], None]], None]) -> boo
     ) as progress:
         step = progress.add_task(description=name, total=1)
 
-        def updateProgress(val):
+        def update_progress(val):
             progress.update(step, completed=val)
 
-        errorStr = None
+        error_str = None
         try:
-            action(updateProgress)
+            action(update_progress)
         except Exception as e:
-            errorStr = str(e)
+            error_str = str(e)
 
     termcursor.showcursor()
 
-    if errorStr == None or errorStr == "":
+    if error_str is None or error_str == "":
         # print(utils.color(" 完成", 32))
         return True
     else:
         # print(utils.color(" 失败", 31))
-        print(errorStr)
+        print(error_str)
         return False

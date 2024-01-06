@@ -1,14 +1,30 @@
-﻿import menuMgr
-import program
-import moveOutPackage
-import mainMenu
-import modifyPackageVersion
-import os
+﻿import os
+
+from runtime import Runtime
+from mainMenu import MainMenu
+from menuMgr import *
+from packageState import PackageState
+from config import Config
+from modifyPackageVersion import ModifyPackageVersion
+from moveOutPackage import MoveOutPackage
 
 # TODO 兼容WindowsTerminal路径
 os.system("")
 
-menuMgr.onTickStart(program.initializeTick)
+cur_config = Config()
+package_state = PackageState(cur_config)
+menu_mgr = MenuMgr()
+runtime = Runtime(cur_config, menu_mgr, package_state)
+main_menu = MainMenu(package_state, cur_config, runtime)
+modify_package_version = ModifyPackageVersion(package_state, menu_mgr, cur_config, runtime)
+move_out_package = MoveOutPackage(package_state, menu_mgr, runtime)
 
-menuMgr.switchMenu(menuMgr.MAIN_MENU)
-menuMgr.startMenu()
+main_menu.register_menu(menu_mgr)
+modify_package_version.register_menu()
+move_out_package.register_menu()
+runtime.register_menu()
+
+menu_mgr.on_tick_start(runtime.initialize_tick)
+
+menu_mgr.switch_menu(MenuNames.MAIN_MENU)
+menu_mgr.start_menu()

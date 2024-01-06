@@ -4,7 +4,8 @@ import re
 import shutil
 import subprocess
 import sys
-from typing import Callable
+
+from packageState import PackageVersion
 
 
 class LogType(enum.Enum):
@@ -13,32 +14,15 @@ class LogType(enum.Enum):
     Error = 3
 
 
-class PackageVersion:
-    def __init__(self, unityCode: int, levelCode: int, versionCode: int):
-        self.unityCode = unityCode
-        self.levelCode = levelCode
-        self.versionCode = versionCode
-
-    def __eq__(self, other):
-        return (
-            self.unityCode == other.unityCode
-            and self.levelCode == other.levelCode
-            and self.versionCode == other.versionCode
-        )
-
-    def getUnavailable():
-        return PackageVersion(-1, -1, -1)
-
-
 PACKAGE_NAME = "com.baitian.polaris.renderframework"
 SPLITER = "[-------------------------------------------------------------]"
 
 
-def exitApplication():
+def exit_application():
     sys.exit(0)
 
 
-def executeCmd(args: [str], cwd: str) -> [str, str]:
+def execute_cmd(args: [str], cwd: str) -> [str, str]:
     c = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     # c = subprocess.Popen(["git", "show"], stdout = subprocess.PIPE, cwd="D:\\UnityProjects\\PJGRASS")
 
@@ -60,7 +44,7 @@ def executeCmd(args: [str], cwd: str) -> [str, str]:
     return stdout, stderr
 
 
-def color(s: str, colorCode: int or None) -> str:
+def color(s: str, color_code: int or None) -> str:
     # 字体颜色
     # 30:黑
     # 31:红
@@ -80,12 +64,12 @@ def color(s: str, colorCode: int or None) -> str:
     # 45:紫色
     # 46:深绿
     # 47:白色
-    if colorCode is None:
+    if color_code is None:
         return s
-    return "\x1b[" + str(colorCode) + "m" + s + "\x1b[0m"
+    return "\x1b[" + str(color_code) + "m" + s + "\x1b[0m"
 
 
-def copyDirectory(src: str, dst: str, deleteSrc: bool = False, setProcess=None):
+def copy_directory(src: str, dst: str, delete_src: bool = False, set_process=None):
     dirs = []
     files = []
     for path, dirNames, fileNames in os.walk(src):
@@ -97,24 +81,24 @@ def copyDirectory(src: str, dst: str, deleteSrc: bool = False, setProcess=None):
 
     size = len(dirs) + len(files)
     count = 0
-    for dir in dirs:
-        dirPath = os.path.join(dst, dir)
-        if not os.path.exists(dirPath):
-            os.makedirs(dirPath)
+    for relative_dir in dirs:
+        dir_path = os.path.join(dst, relative_dir)
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         count += 1
-        if setProcess is not None:
-            setProcess(count / size)
+        if set_process is not None:
+            set_process(count / size)
     for file in files:
         shutil.copy(os.path.join(src, file), os.path.join(dst, file))
         count += 1
-        if setProcess is not None:
-            setProcess(count / size)
+        if set_process is not None:
+            set_process(count / size)
 
-    if deleteSrc:
+    if delete_src:
         shutil.rmtree(src)
 
 
-def clearDirectory(path: str, setProcess):
+def clear_directory(path: str, set_process):
     dirs = []
     files = []
     if not os.path.exists(path):
@@ -135,89 +119,74 @@ def clearDirectory(path: str, setProcess):
     for file in files:
         os.remove(file)
         count += 1
-        if setProcess is not None:
-            setProcess(count / size)
-    for dir in dirs:
-        if os.path.exists(dir):
-            shutil.rmtree(dir)
+        if set_process is not None:
+            set_process(count / size)
+    for d in dirs:
+        if os.path.exists(d):
+            shutil.rmtree(d)
         count += 1
-        if setProcess is not None:
-            setProcess(count / size)
+        if set_process is not None:
+            set_process(count / size)
 
 
-def printInline(char):
+def print_inline(char):
     print(char, end="", flush=True)
 
 
-def getIntent(intent: int):
-    intendStr = ""
+def get_intent(intent: int):
+    intend_str = ""
     for i in range(intent):
-        intendStr += "  "
-    return intendStr
+        intend_str += "  "
+    return intend_str
 
 
-def log(message: str, type: LogType = LogType.Log):
-    if type == LogType.Error:
+def log(message: str, t: LogType = LogType.Log):
+    if t == LogType.Error:
         message = "[\x1b[41mERROR\x1b[0m]" + message
     print(message)
 
 
-def getUnityPackagesPath(projectPath: str) -> str:
-    return projectPath + "/Packages"
+def get_unity_packages_path(project_path: str) -> str:
+    return project_path + "/Packages"
 
 
-def getUnityPackageCachePath(projectPath: str) -> str:
-    return projectPath + "/Library/PackageCache"
+def get_unity_package_cache_path(project_path: str) -> str:
+    return project_path + "/Library/PackageCache"
 
 
-def getPackagesLockJsonPath(projectPath: str) -> str:
-    return getUnityPackagesPath(projectPath) + "/packages-lock.json"
+def get_packages_lock_json_path(project_path: str) -> str:
+    return get_unity_packages_path(project_path) + "/packages-lock.json"
 
 
-def getManifestJsonPath(projectPath: str) -> str:
-    return getUnityPackagesPath(projectPath) + "/manifest.json"
+def get_manifest_json_path(project_path: str) -> str:
+    return get_unity_packages_path(project_path) + "/manifest.json"
 
 
-def getPackageVersionStr(packageVersion: PackageVersion, color: int = -1) -> str:
-    colorPrefix = "" if color < 0 else ("\x1b[" + str(color) + "m")
-    colorPostFix = "" if color < 0 else "\x1b[0m"
-
-    return (
-        str(packageVersion.unityCode)
-        + "."
-        + str(packageVersion.levelCode)
-        + "."
-        + colorPrefix
-        + str(packageVersion.versionCode)
-        + colorPostFix
-    )
-
-
-def getPackageVersion(packagePath: str) -> PackageVersion:
-    match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", packagePath)
+def get_package_version(package_path: str) -> PackageVersion:
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)$", package_path)
     if not match:
-        return PackageVersion.getUnavailable()
+        return PackageVersion.get_unavailable()
 
     return PackageVersion(int(match.group(1)), int(match.group(2)), int(match.group(3)))
 
 
-def getPackageFullName(packageVersion: PackageVersion) -> str:
-    return PACKAGE_NAME + "@" + getPackageVersionStr(packageVersion)
+def get_package_full_name(package_version: PackageVersion) -> str:
+    return PACKAGE_NAME + "@" + package_version.to_str()
 
 
-def getPackagePath(projectPath: str, inCache: bool, packageVersion: PackageVersion) -> str:
-    if inCache:
+def get_package_path(project_path: str, in_cache: bool, package_version: PackageVersion) -> str:
+    if in_cache:
         return os.path.join(
-            getUnityPackageCachePath(projectPath),
-            getPackageFullName(packageVersion),
+            get_unity_package_cache_path(project_path),
+            get_package_full_name(package_version),
         )
     else:
-        return os.path.join(getUnityPackagesPath(projectPath), getPackageFullName(packageVersion))
+        return os.path.join(get_unity_packages_path(project_path), get_package_full_name(package_version))
 
 
-def getPackageJsonPath(packagePath: str) -> str:
-    return packagePath + "/package.json"
+def get_package_json_path(package_path: str) -> str:
+    return package_path + "/package.json"
 
 
-def getConfigJsonPath() -> str:
+def get_config_json_path() -> str:
     return "./config.json"

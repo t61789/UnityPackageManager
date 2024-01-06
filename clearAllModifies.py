@@ -1,30 +1,35 @@
 import menuMgr
-import program
 import processTask
-import utils
+from runtime import *
 
 
-def clearAllModifies():
-    print()
+class ClearAllModifies:
 
-    if not menuMgr.confirmMenu("确认要移除所有的修改吗？"):
-        print(utils.color("取消操作", 31))
-        return
+    def __init__(self, menu_mgr: menuMgr.MenuMgr, runtime: Runtime):
+        self.menu_mgr = menu_mgr
+        self.runtime = runtime
 
-    def step0(setProcess):
-        setProcess(0.5)
-        program.executeGitCommand(["add", "."])
-        setProcess(1)
+    def clear_all_modifies(self):
+        print()
 
-    if not processTask.runStep("添加所有修改: ", step0):
-        return
+        if not menuMgr.MenuMgr.confirm_menu("确认要移除所有的修改吗？"):
+            print(utils.color("取消操作", 31))
+            return
 
-    def step1(setProcess):
-        setProcess(0.3)
-        program.executeGitCommand(["reset", "--hard", "head"])
-        setProcess(1)
+        def step0(set_process):
+            set_process(0.5)
+            self.runtime.execute_git_command(["add", "."])
+            set_process(1)
 
-    if not processTask.runStep("移除所有修改: ", step1):
-        return
+        if not processTask.run_step("添加所有修改: ", step0):
+            return
 
-    print(utils.color("移除所有修改成功", 32))
+        def step1(set_process):
+            set_process(0.3)
+            self.runtime.execute_git_command(["reset", "--hard", "head"])
+            set_process(1)
+
+        if not processTask.run_step("移除所有修改: ", step1):
+            return
+
+        print(utils.color("移除所有修改成功", 32))

@@ -1,40 +1,44 @@
 import utils
 import shutil
 import os
-import program
+
+from runtime import Runtime
 
 
-def getNeedDeleteFilesPath() -> ([str], [str]):
-    bnPath = program.getCurProjectPath()
-    shaderCacheDbPath = bnPath + "/Library/ShaderCache.db"
-    shaderCachePath = bnPath + "/Library/ShaderCache"
-    playerDataCache = bnPath + "/Library/PlayerDataCache"
-    return ([shaderCacheDbPath], [shaderCachePath, playerDataCache])
+class DeleteShaderCache:
+    
+    def __init__(self, runtime: Runtime):
+        self.runtime = runtime
 
+    def __get_need_delete_files_path(self) -> ([str], [str]):
+        bn_path = self.runtime.get_cur_project_path()
+        shader_cache_db_path = bn_path + "/Library/ShaderCache.db"
+        shader_cache_path = bn_path + "/Library/ShaderCache"
+        player_data_cache = bn_path + "/Library/PlayerDataCache"
+        return [shader_cache_db_path], [shader_cache_path, player_data_cache]
 
-def delete(path: str, isFile: bool) -> bool:
-    utils.printInline("正在删除：" + os.path.relpath(path, program.getCurProjectPath()))
-    try:
-        if isFile:
-            os.remove(path)
-        else:
-            shutil.rmtree(path)
-    except Exception as e:
-        print(utils.color(" 失败：", 31), e.args)
-        return False
+    def __delete(self, path: str, is_file: bool) -> bool:
+        utils.print_inline("正在删除：" + os.path.relpath(path, self.runtime.get_cur_project_path()))
+        try:
+            if is_file:
+                os.remove(path)
+            else:
+                shutil.rmtree(path)
+        except Exception as e:
+            print(utils.color(" 失败：", 31), e.args)
+            return False
 
-    print(utils.color(" 成功", 32))
-    return True
+        print(utils.color(" 成功", 32))
+        return True
+    
+    def delete_shader_cache(self):
+        print()
 
+        (files, dirs) = DeleteShaderCache.__get_need_delete_files_path()
 
-def deleteShaderCache():
-    print()
+        for p in files:
+            self.__delete(p, True)
+        for p in dirs:
+            self.__delete(p, False)
 
-    (files, dirs) = getNeedDeleteFilesPath()
-
-    for p in files:
-        delete(p, True)
-    for p in dirs:
-        delete(p, False)
-
-    print(utils.color("删除完成", 32))
+        print(utils.color("删除完成", 32))
