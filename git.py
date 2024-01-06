@@ -1,73 +1,21 @@
+﻿import datetime
+
 import termcursor
 import queue
 import subprocess
 import threading
 import time
-import datetime
 
 from rich.panel import Panel
 from rich.progress import *
 from termcursor import termcursor
-from rich.console import Console
 
+# spinner = ["|", "/", "-", "\\"]
 spinner = ["-", "=", "#", "="]
 spinner_index = 0
 start_time = time.perf_counter()
 console = Console(highlight=False)
 print = console.print
-
-
-def complete_info(task_name: str, elapsed: float, succeed: bool):
-    start_time_str = f"[cornflower_blue][{datetime.datetime.now().strftime('%H:%M:%S.%f')[:-4]}][/]"
-    success_str = "[green][成功][/green]" if succeed else "[red][失败][/]"
-    cost_time = f"[cyan][COST:{elapsed:.2f}s][/]"
-    return f"{start_time_str}>{cost_time}{success_str} {task_name}"
-
-
-class TimeElapsedColumnAdvance(ProgressColumn):
-    """Renders time elapsed."""
-
-    def render(self, task: "Task") -> Text:
-        """Show time elapsed."""
-        elapsed = task.finished_time if task.finished else task.elapsed
-        if elapsed is None:
-            return Text("-:--:--:--", style="progress.elapsed")
-        delta = timedelta(seconds=max(0, elapsed))
-        return Text(str(delta)[2:10:], style="progress.elapsed")
-
-
-def run_step(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
-    termcursor.hidecursor()
-    global start_time
-    start_time = time.perf_counter()
-
-    with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
-            TimeElapsedColumnAdvance(),
-            transient=True
-    ) as progress:
-        step = progress.add_task(description=name, total=1)
-
-        def update_progress(val):
-            progress.update(step, completed=val)
-
-        error_str = None
-        try:
-            action(update_progress)
-        except Exception as e:
-            error_str = str(e)
-
-    termcursor.showcursor()
-
-    if error_str is None or error_str == "":
-        print(complete_info(name, time.perf_counter() - start_time, True))
-        return True
-    else:
-        print(complete_info(name, time.perf_counter() - start_time, False))
-        print(error_str)
-        return False
 
 
 def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str):
@@ -90,7 +38,7 @@ def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callabl
 
     leave = False
     while True:
-        time.sleep(0.05)
+        time.sleep(0.1)
         on_loop_start()
         while not stdout_queue.empty():
             line = stdout_queue.get()
@@ -128,15 +76,13 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
     termcursor.hidecursor()
 
     output_list = []
-    cmd_str = " ".join(cmd)
-    output_list.append(f"执行：{cmd_str}\n")
     err_list = []
     buffer_max_size = 7
 
     global start_time
     start_time = time.perf_counter()
 
-    with Live(refresh_per_second=20, transient=True) as live:
+    with Live(refresh_per_second=10, transient=True) as live:
 
         def update_live():
             global spinner_index
@@ -157,7 +103,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
                 output_list.pop(0)
 
         execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
-        time.sleep(0.5)
+        time.sleep(3)
 
     has_err = len(err_list) > 0
     if has_err and show_detail_when_error:
@@ -165,11 +111,17 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
         print(
             Panel("".join(err_list), title=get_execute_error_title(task_name, cmd), title_align="left", height=height))
 
-    print(complete_info(task_name, time.perf_counter() - start_time, not has_err))
-    
     termcursor.showcursor()
 
     return not has_err, time.perf_counter() - start_time
 
-# success, elapsed_time = run_cmd_task("ping测试", ".", ["ping", "www.baidu.com"], show_detail_when_error=True)
+
+def complete_info(task_name: str, elapsed: float, succeed: bool):
+    start_time_str = f"[cornflower_blue][{datetime.datetime.now().strftime('%H:%M:%S.%f')[:-4]}][/]"
+    success_str = "[green][成功][/green]" if succeed else "[red][失败][/]"
+    cost_time = f"[cyan][COST:{elapsed:.2f}s][/]"
+    return f"{start_time_str} {task_name} {success_str}{cost_time}"
+
+
+success, elapsed_time = run_cmd_task("ping测试", "D:\\UnityProjects\\PJGRASS", ["git", "reset", "--hard", "head"], show_detail_when_error=True)
 # print(complete_info("ping测试", elapsed_time, success))
