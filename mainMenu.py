@@ -81,6 +81,7 @@ class MainMenu:
         copy_to_rf_project = copyToRfProject.CopyToRfProject(self.package_state, self.config, menu_mgr, self.runtime)
         move_out_package = moveOutPackage.MoveOutPackage(self.package_state, menu_mgr, self.runtime)
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
+        clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
             
         menu_mgr.register_menu(
             MenuNames.MAIN_MENU,
@@ -92,7 +93,7 @@ class MainMenu:
                     KeyAction("a", "移出Package", move_out_package.try_switch_move_out_package_menu),
                     KeyAction("r", "修改Package版本", lambda: menu_mgr.switch_menu(MenuNames.MODIFY_PACKAGE_JSON_MENU)),
                     KeyAction("g", "复制Package到RF工程", copy_to_rf_project.start_copy),
-                    KeyAction("s", "清除所有修改", ClearAllModifies.clear_all_modifies),
+                    KeyAction("s", "清除所有修改", clear_all_modifies.clear_all_modifies),
                     KeyAction("b", "删除ShaderCache", delete_shader_cache.delete_shader_cache),
                     KeyAction("q", "退出", utils.exit_application),
                     # TODO 进阶操作

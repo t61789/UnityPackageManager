@@ -30,13 +30,13 @@ class Config:
                 project_path.byname = project_path_json["byname"]
                 project_path.path = project_path_json["path"].replace("\\", "/")
                 self.project_paths.append(project_path)
-            rf_path = config_json["renderFrameworkPath"].replace("\\", "/")
+            self.rf_path = config_json["renderFrameworkPath"].replace("\\", "/")
             self.unity_editor_path = config_json["unityEditorPath"].replace("\\", "/")
-        except Exception as e:
+        except Exception:
             raise Exception("config.json格式错误")
 
         if len(self.project_paths) == 0:
             raise Exception("无指定的工程")
 
-        if rf_path is None or rf_path == "":
+        if self.rf_path is None or self.rf_path == "":
             raise Exception("RenderFramework未指定")

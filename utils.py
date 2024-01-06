@@ -14,7 +14,8 @@ class LogType(enum.Enum):
     Error = 3
 
 
-PACKAGE_NAME = "com.baitian.polaris.renderframework"
+# PACKAGE_NAME = "com.baitian.polaris.renderframework"
+PACKAGE_NAME = "com.unity.render-pipelines.universal"
 SPLITER = "[-------------------------------------------------------------]"
 
 

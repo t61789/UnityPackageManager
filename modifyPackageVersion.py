@@ -12,7 +12,7 @@ class ModifyPackageVersion:
         self.runtime = runtime
 
     @staticmethod
-    def input_version(pre_version: PackageVersion) -> PackageVersion or None:
+    def __input_version(pre_version: PackageVersion) -> PackageVersion or None:
         print()
         version_str = pre_version.to_str()
         last_dot_index = version_str.rfind(".")
@@ -45,9 +45,9 @@ class ModifyPackageVersion:
             print(utils.color("\n无效输入", 31))
             return None
 
-        return version_str + str(new_version_code)
+        return PackageVersion.load_from_str(version_str + str(new_version_code))
 
-    def modify_packages_lock_json(self, package_version: PackageVersion, set_process):
+    def __modify_packages_lock_json(self, package_version: PackageVersion, set_process):
         set_process(0.5)
 
         project_path = self.runtime.get_cur_project_path()
@@ -63,7 +63,7 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def modify_manifest_json(self, package_version: PackageVersion, set_process):
+    def __modify_manifest_json(self, package_version: PackageVersion, set_process):
         set_process(0.5)
 
         project_path = self.runtime.get_cur_project_path()
@@ -78,7 +78,7 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def add_json_change_to_git(self, set_process):
+    def __add_json_change_to_git(self, set_process):
         set_process(0.3)
 
         self.runtime.execute_git_command(
@@ -99,7 +99,7 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def commit_change(self, new_version: PackageVersion, set_process):
+    def __commit_change(self, new_version: PackageVersion, set_process):
         set_process(0.5)
 
         self.runtime.execute_git_command(
@@ -112,7 +112,7 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def modify_package_in_unity(self):
+    def __modify_package_in_unity(self):
         print()
 
         if not self.package_state.in_cache:
@@ -120,37 +120,37 @@ class ModifyPackageVersion:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
-        new_version = self.input_version(self.package_state.version)
+        new_version = self.__input_version(self.package_state.version)
         if not new_version:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
         if not processTask.run_step(
                 "修改packages-lock.json配置: ",
-                lambda set_process: self.modify_packages_lock_json(new_version, set_process),
+                lambda set_process: self.__modify_packages_lock_json(new_version, set_process),
         ):
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
         if not processTask.run_step(
                 "修改manifest.json配置: ",
-                lambda set_process: self.modify_manifest_json(new_version, set_process),
+                lambda set_process: self.__modify_manifest_json(new_version, set_process),
         ):
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
-        if not processTask.run_step("将修改添加到git: ", lambda set_process: self.add_json_change_to_git(set_process)):
+        if not processTask.run_step("将修改添加到git: ", lambda set_process: self.__add_json_change_to_git(set_process)):
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
-        if not processTask.run_step("提交修改: ", lambda set_process: self.commit_change(new_version, set_process)):
+        if not processTask.run_step("提交修改: ", lambda set_process: self.__commit_change(new_version, set_process)):
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
         print(utils.color("修改成功", 32))
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
-    def modify_packages_json(self, new_version: PackageVersion, set_process):
+    def __modify_packages_json(self, new_version: PackageVersion, set_process):
         set_process(0.3)
 
         package_json_path = self.config.rf_path + "/package.json"
@@ -163,10 +163,10 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def modify_package_in_rf(self):
+    def __modify_package_in_rf(self):
         print()
 
-        new_version = self.input_version(self.package_state.rf_version)
+        new_version = self.__input_version(self.package_state.rf_version)
         if not new_version:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
@@ -175,7 +175,7 @@ class ModifyPackageVersion:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
-        if not processTask.run_step("修改packages.json配置: ", lambda set_process: self.modify_packages_json(new_version, set_process)):
+        if not processTask.run_step("修改packages.json配置: ", lambda set_process: self.__modify_packages_json(new_version, set_process)):
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
@@ -206,8 +206,8 @@ class ModifyPackageVersion:
             Menu(
                 "选择要修改的包",
                 [
-                    KeyAction("r", "RF工程", self.modify_package_in_rf),
-                    KeyAction("e", "Unity工程", self.modify_package_in_unity),
+                    KeyAction("r", "RF工程", self.__modify_package_in_rf),
+                    KeyAction("e", "Unity工程", self.__modify_package_in_unity),
                     KeyAction("q", "返回", lambda: self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)),
                 ],
                 new_line=True,

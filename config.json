@@ -1,7 +1,7 @@
 {
-  "renderFrameworkPath": "D:\\Unity\\UnityProjects\\Polaris_RenderFramework",
+  "renderFrameworkPath": "T:\\RenderFramework",
   "projectPaths": [
-    { "byname": "Main", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_Main\\UnityProj" },
+    { "byname": "Main", "path": "D:\\UnityProjects\\PJGRASS" },
     { "byname": "CBT1", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_CBT1\\UnityProj" },
     { "byname": "Develop", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_Dev\\UnityProj" }
   ],

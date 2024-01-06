@@ -65,7 +65,7 @@ class PackageState:
             package_json = json.load(f)
         return PackageVersion.load_from_str(package_json["version"])
     
-    def analyze_package_state(self, project_path):
+    def analyze_package_state(self, project_path: str):
         # 读取packages-lock.json，判断包位置
         try:
             with open(utils.get_packages_lock_json_path(project_path)) as f:

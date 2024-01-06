@@ -34,7 +34,7 @@ class DeleteShaderCache:
     def delete_shader_cache(self):
         print()
 
-        (files, dirs) = DeleteShaderCache.__get_need_delete_files_path()
+        (files, dirs) = self.__get_need_delete_files_path()
 
         for p in files:
             self.__delete(p, True)

@@ -69,7 +69,7 @@ class MenuMgr:
             if isinstance(menu.header, str):
                 print(intend_str + menu.header)
             elif callable(menu.header):
-                menu.header()
+                print(menu.header())
 
         for keyAction in menu.key_actions:
             print(intend_str, keyAction.key, ": ", keyAction.describe)

@@ -1,12 +1,11 @@
-import packageState
 import processTask
-from menuMgr import *
 from runtime import *
+from packageState import *
 
 
 class MoveOutPackage:
     
-    def __init__(self, package_state: packageState.PackageState, menu_mgr: MenuMgr, runtime: Runtime):
+    def __init__(self, package_state: PackageState, menu_mgr: MenuMgr, runtime: Runtime):
         self.package_state = package_state
         self.menu_mgr = menu_mgr
         self.runtime = runtime
@@ -36,7 +35,8 @@ class MoveOutPackage:
         package_json["source"] = "embedded"
         package_json["version"] = "file:" + utils.get_package_full_name(self.package_state.version)
         package_json["depth"] = 0
-        del package_json["url"]
+        if "url" in package_json:
+            del package_json["url"]
 
         set_process(0.6)
 
