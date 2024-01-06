@@ -51,18 +51,24 @@ def getMainMenuHeader() -> str:
 
     s += "[Package位置]\t\t" + packagePosition + "\n"
 
-    # Package版本
+    # BN Package版本
     s += "[BN_Package版本]\t" + utils.getPackageVersionStr(packageState.version, 33) + "\n"
 
     # RF Package版本
-    if packageState.isVersionHigher(packageState.rfVersion, packageState.version):
-        versionCompare = utils.color(" [NEW]", 34)
-    elif packageState.rfVersion == packageState.version:
-        versionCompare = ""
+    if packageState.rfVersion == packageState.version:
+        needBack = False
+        needUpdate = False
     else:
-        versionCompare = utils.color(" [OLD]", 31)
+        needBack = packageState.isVersionHigher(packageState.rfVersion, packageState.version)
+        needUpdate = not needBack
 
-    s += "[RF_Package版本]\t" + utils.getPackageVersionStr(packageState.rfVersion, 33) + versionCompare + "\n"
+    if needUpdate:
+        versionNote = utils.color(" [需要更新]", 31)
+    elif needBack:
+        versionNote = utils.color(" [需要回退]", 31)
+    else:
+        versionNote = ""
+    s += "[RF_Package版本]\t" + utils.getPackageVersionStr(packageState.rfVersion, 33) + versionNote + "\n"
     print(s)
 
 
@@ -74,7 +80,9 @@ menuMgr.registerMenu(
             menuMgr.KeyAction("w", "重新读取项目信息", None),
             menuMgr.KeyAction("v", "切换工程", program.switchProjectIndex),
             menuMgr.KeyAction("a", "移出Package", moveOutPackage.trySwitchMoveOutPackageMenu),
-            menuMgr.KeyAction("r", "修改Package版本", lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU)),
+            menuMgr.KeyAction(
+                "r", "修改Package版本", lambda: menuMgr.switchMenu(menuMgr.MODIFY_PACKAGE_JSON_MENU)
+            ),
             menuMgr.KeyAction("g", "复制Package到RF工程", copyToRfProject.startCopy),
             menuMgr.KeyAction("s", "清除所有修改", clearAllModifies.clearAllModifies),
             menuMgr.KeyAction("b", "删除ShaderCache", deleteShaderCache.deleteShaderCache),

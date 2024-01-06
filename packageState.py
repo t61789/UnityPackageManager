@@ -19,11 +19,7 @@ def getPackageVersion(packagePath: str) -> utils.PackageVersion:
 
 def findAvailablePackageDirectories(projectPath: str, inCache: bool) -> list:
     availablePackageDirectories = []
-    findDirectory = (
-        utils.getUnityPackageCachePath(projectPath)
-        if inCache
-        else utils.getUnityPackagesPath(projectPath)
-    )
+    findDirectory = utils.getUnityPackageCachePath(projectPath) if inCache else utils.getUnityPackagesPath(projectPath)
 
     for dirName in os.listdir(findDirectory):
         dirPath = os.path.join(findDirectory, dirName)
@@ -42,9 +38,7 @@ def findAvailablePackageDirectories(projectPath: str, inCache: bool) -> list:
     return availablePackageDirectories
 
 
-def isVersionHigher(
-    version1: utils.PackageVersion, version2: utils.PackageVersion
-) -> bool:
+def isVersionHigher(version1: utils.PackageVersion, version2: utils.PackageVersion) -> bool:
     if version1.unityCode > version2.unityCode:
         return True
     if version1.unityCode < version2.unityCode:
@@ -68,14 +62,10 @@ def analyzePackageState(projectPath):
 
     global inCache, path, exists, version
     try:
-        inCache = (
-            packagesLockJson["dependencies"][utils.PACKAGE_NAME]["source"] != "embedded"
-        )
+        inCache = packagesLockJson["dependencies"][utils.PACKAGE_NAME]["source"] != "embedded"
 
         if inCache:
-            version = utils.getPackageVersion(
-                packagesLockJson["dependencies"][utils.PACKAGE_NAME]["version"]
-            )
+            version = utils.getPackageVersion(packagesLockJson["dependencies"][utils.PACKAGE_NAME]["version"])
             path = utils.getPackagePath(projectPath, inCache, version)
             exists = os.path.exists(utils.getPackageJsonPath(path))
     except Exception as e:
@@ -83,9 +73,7 @@ def analyzePackageState(projectPath):
 
     if not inCache:
         # 如果包不在Cache里，packages-lock.json中就不包含版本信息，需要去Packages文件夹下找可用的包
-        availablePackageDirectories = findAvailablePackageDirectories(
-            projectPath, inCache
-        )
+        availablePackageDirectories = findAvailablePackageDirectories(projectPath, inCache)
         if len(availablePackageDirectories) == 0:
             raise Exception("packages-lock.json描述包在Packages内，但未找到可用的包，请使用Unity重新生成")
 
