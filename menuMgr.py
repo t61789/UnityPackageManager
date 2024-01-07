@@ -2,7 +2,10 @@ import msvcrt
 from typing import Callable
 import readchar
 import utils
+import rich.console
 
+console = rich.console.Console(highlight=False)
+print = console.print
 
 class KeyAction:
     def __init__(self, key: str, describe: str, action: Callable):
@@ -72,7 +75,7 @@ class MenuMgr:
                 print(menu.header())
 
         for keyAction in menu.key_actions:
-            print(intend_str, keyAction.key, ": ", keyAction.describe)
+            print(f"{intend_str}[cyan]{keyAction.key}[/]: {keyAction.describe}")
         utils.print_inline(intend_str + "输入: ")
 
     def switch_menu(self, menu_name: str):
