@@ -78,40 +78,6 @@ class ModifyPackageVersion:
 
         set_process(1)
 
-    def __add_json_change_to_git(self, set_process):
-        set_process(0.3)
-
-        self.runtime.execute_git_command(
-            [
-                "add",
-                self.runtime.get_cur_project_path() + "/Packages/manifest.json",
-            ]
-        )
-
-        set_process(0.6)
-
-        self.runtime.execute_git_command(
-            [
-                "add",
-                self.runtime.get_cur_project_path() + "/Packages/packages-lock.json",
-            ]
-        )
-
-        set_process(1)
-
-    def __commit_change(self, new_version: PackageVersion, set_process):
-        set_process(0.5)
-
-        self.runtime.execute_git_command(
-            [
-                "commit",
-                "-m",
-                "feat：【renderframework】更新至" + new_version.to_str(),
-            ]
-        )
-
-        set_process(1)
-
     def __modify_package_in_unity(self):
         print()
 
@@ -124,30 +90,45 @@ class ModifyPackageVersion:
         if not new_version:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
+        if new_version == self.package_state.version:
+            print(utils.color("版本号未改变，取消操作", 31))
+            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
+            return
 
-        if not processTask.run_step(
+        def task0():
+            return processTask.run_step(
                 "修改packages-lock.json配置: ",
-                lambda set_process: self.__modify_packages_lock_json(new_version, set_process),
-        ):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
-
-        if not processTask.run_step(
+                lambda set_process: self.__modify_packages_lock_json(new_version, set_process))
+        
+        def task1():
+            return processTask.run_step(
                 "修改manifest.json配置: ",
-                lambda set_process: self.__modify_manifest_json(new_version, set_process),
-        ):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
+                lambda set_process: self.__modify_manifest_json(new_version, set_process))
 
-        if not processTask.run_step("将修改添加到git: ", lambda set_process: self.__add_json_change_to_git(set_process)):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
+        def task2():
+            return processTask.run_cmd_task(
+                "将添加packages-lock.json修改到git: ",
+                self.runtime.get_cur_project_path(),
+                ["git", "add", "Packages/packages-lock.json"],
+                stay_time=0.1)
+    
+        def task3():
+            return processTask.run_cmd_task(
+                "将添加manifest.json修改到git: ",
+                self.runtime.get_cur_project_path(),
+                ["git", "add", "Packages/manifest.json"],
+                stay_time=0.1)
+        
+        def task4():
+            return processTask.run_cmd_task(
+                "提交版本修改",
+                self.runtime.get_cur_project_path(),
+                ["git", "commit", "-m", "feat：【renderframework】更新至" + new_version.to_str()])
+        
+        all_task_succeed = processTask.run_tasks([task0, task1, task2, task3, task4])
+        if all_task_succeed:
+            print(utils.color("修改成功", 32))
 
-        if not processTask.run_step("提交修改: ", lambda set_process: self.__commit_change(new_version, set_process)):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
-
-        print(utils.color("修改成功", 32))
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
     def __modify_packages_json(self, new_version: PackageVersion, set_process):
@@ -175,28 +156,28 @@ class ModifyPackageVersion:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
-        if not processTask.run_step("修改packages.json配置: ", lambda set_process: self.__modify_packages_json(new_version, set_process)):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
+        def task0():
+            return processTask.run_step(
+                "修改packages.json配置: ",
+                lambda set_process: self.__modify_packages_json(new_version, set_process))
+
+        def task1():
+            return processTask.run_cmd_task(
+                "添加package.json修改到缓冲区",
+                self.config.rf_path,
+                ["git", "add", "package.json"])
+
+        def task2():
+            return processTask.run_cmd_task(
+                "提交版本修改",
+                self.config.rf_path,
+                ["git", "commit", "-m", "feat：【版本】更新至" + new_version.to_str()])
+        
+        all_task_succeed = processTask.run_tasks([task0, task1, task2])
+        if all_task_succeed:
+            print(utils.color("修改成功", 32))
             return
 
-        def commit_package_json_change(v: PackageVersion, set_process):
-            set_process(0.1)
-            self.runtime.execute_git_command_rf(["add", self.config.rf_path + "/package.json"])
-            set_process(0.6)
-            self.runtime.execute_git_command_rf(
-                [
-                    "commit",
-                    "-m",
-                    "feat：【版本】更新至" + v.to_str(),
-                ]
-            )
-            set_process(1)
-
-        if not processTask.run_step("提交修改: ", lambda set_process: commit_package_json_change(new_version, set_process)):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
-
-        print(utils.color("修改成功", 32))
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
         return
 

@@ -36,6 +36,16 @@ class TimeElapsedColumnAdvance(ProgressColumn):
         return Text(str(delta)[2:10:], style="progress.elapsed")
 
 
+def run_tasks(tasks):
+    for task in tasks:
+        try:
+            if not task():
+                return False
+        except Exception:
+            return False
+    return True
+
+
 def run_step(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
     termcursor.hidecursor()
     global start_time
@@ -124,7 +134,7 @@ def get_execute_error_title(task_name: str, cmd: [str]):
     return f"[red]{task_name} {get_running_time()} Execute Command Error: {cmd_str}[/]"
 
 
-def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = False):
+def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time = 0.5):
     termcursor.hidecursor()
 
     output_list = []
@@ -157,7 +167,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
                 output_list.pop(0)
 
         execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
-        time.sleep(0.5)
+        time.sleep(stay_time)
 
     has_err = len(err_list) > 0
     if has_err and show_detail_when_error:
@@ -166,7 +176,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
             Panel("".join(err_list), title=get_execute_error_title(task_name, cmd), title_align="left", height=height))
 
     print(complete_info(task_name, time.perf_counter() - start_time, not has_err))
-    
+
     termcursor.showcursor()
 
     return not has_err, time.perf_counter() - start_time
