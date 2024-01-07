@@ -70,10 +70,10 @@ class MenuMgr:
             intend_str += "  "
 
         if menu.header:
-            if isinstance(menu.header, str):
-                print(intend_str + menu.header)
-            elif callable(menu.header):
+            if callable(menu.header):
                 print(menu.header())
+            else:
+                print(intend_str + menu.header)
 
         for keyAction in menu.key_actions:
             print(f"{intend_str}[cyan]{keyAction.key}[/]: {keyAction.describe}")

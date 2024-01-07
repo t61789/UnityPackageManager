@@ -25,9 +25,9 @@ class PackageVersion:
         result = result and self.version_code == other.version_code
         return result
     
-    def to_str(self, color: int = -1) -> str:
-        color_prefix = "" if color < 0 else ("\x1b[" + str(color) + "m")
-        color_post_fix = "" if color < 0 else "\x1b[0m"
+    def to_str(self, color: str | None = None) -> str:
+        color_prefix = "" if not color else f"[{color}]"
+        color_post_fix = "" if not color else "[/]"
 
         return str(self.unity_code) + "." + str(self.level_code) + "." + color_prefix + str(self.version_code) + color_post_fix
 

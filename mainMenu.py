@@ -1,3 +1,5 @@
+from rich.panel import Panel
+
 import copyToRfProject
 import deleteShaderCache
 import git
@@ -6,6 +8,8 @@ import utils
 from clearAllModifies import *
 from git import GitCommands
 from runtime import *
+from rich import box
+from rich.table import Table
 
 
 class MainMenu:
@@ -14,54 +18,65 @@ class MainMenu:
         self.package_state = package_state
         self.config = cur_config
         self.runtime = runtime
+        self.box = box.Box(
+            "╭──╮\n"
+            "│  │\n"
+            "├─┼┤\n"
+            "│  │\n"
+            "├─┼┤\n"
+            "├─┼┤\n"
+            "│  │\n"
+            "╰──╯\n"
+        )
 
-    def __get_candidate_projects(self) -> str | None:
+    def __get_candidate_projects(self):
         project_num = len(self.config.project_paths)
         if project_num == 0:
             return None
-        s = "[Unity项目候选]\t\t"
+        row_name = "[Unity项目候选]"
+        s = ""
         for i in range(project_num):
             byname = self.config.project_paths[i].byname
             if i == self.runtime.cur_project_index:
-                byname = utils.color(byname, 34)
+                byname = f"[cyan]{byname}[/]"
             s += byname
             if i != project_num - 1:
-                s += " | "
-        return s + "\n"
+                s += " "
+        return [row_name, s]
 
-    def get_header(self) -> str:
+    def get_header(self):
         project_path = self.config.project_paths[self.runtime.cur_project_index]
-        s = "\n"
 
-        s += utils.SPLITER + "\n"
-
+        table = Table(title="Unity Package Manager", box=self.box, show_header=False)
+        table.add_column()
+        table.add_column()
+        
         # Unity项目候选
-        s += self.__get_candidate_projects()
+        table.add_row(*self.__get_candidate_projects())
 
         # Unity项目路径
-        byname = utils.color(project_path.byname, 34)
-        s += "[Unity项目路径]\t\t" + byname + " " + project_path.path + "\n"
+        table.add_row("[Unity项目路径]", f"[cyan]{project_path.byname}[/] {project_path.path}")
 
         # RenderFramework路径
-        s += "[RenderFramework路径]\t" + self.config.rf_path + "\n"
+        table.add_row("[RenderFramework路径]", self.config.rf_path)
 
         package_state = self.package_state
 
         # Package位置
         if package_state.in_cache:
-            package_position = utils.color("Cache", 32)
+            package_position = "[green]Cache[/]"
             if not package_state.exists:
-                package_position += utils.color("（不存在本地文件）", 35)
+                package_position += "[purple]（不存在本地文件）[/]"
         else:
-            package_position = utils.color("Packages", 31)
+            package_position = "[blue]Packages[/]"
 
-        s += "[Package位置]\t\t" + package_position + "\n"
+        table.add_row("[Package位置]", package_position)
 
         bn_version = package_state.version
         rf_version = package_state.rf_version
 
         # BN Package版本
-        s += "[BN_Package版本]\t" + bn_version.to_str(33) + "\n"
+        table.add_row("[BN_Package版本]", bn_version.to_str("yellow"))
 
         # RF Package版本
         if rf_version == bn_version:
@@ -72,13 +87,13 @@ class MainMenu:
             need_update = not need_back
 
         if need_update:
-            version_note = utils.color(" [需要更新]", 31)
+            version_note = " [red][需要更新][/]"
         elif need_back:
-            version_note = utils.color(" [需要回退]", 31)
+            version_note = " [red][需要回退][/]"
         else:
             version_note = ""
-        s += "[RF_Package版本]\t" + rf_version.to_str(33) + version_note + "\n"
-        return s
+        table.add_row("[RF_Package版本]", rf_version.to_str("yellow") + version_note)
+        return table
 
     def register_menu(self, menu_mgr: MenuMgr):
         copy_to_rf_project = copyToRfProject.CopyToRfProject(self.package_state, self.config, menu_mgr, self.runtime)
@@ -86,7 +101,7 @@ class MainMenu:
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
         clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
         git_commands = GitCommands(self.package_state, self.config)
-            
+
         menu_mgr.register_menu(
             MenuNames.MAIN_MENU,
             Menu(
