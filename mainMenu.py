@@ -38,16 +38,16 @@ class MainMenu:
         for i in range(project_num):
             byname = self.config.project_paths[i].byname
             if i == self.runtime.cur_project_index:
-                byname = f"[cyan]{byname}[/]"
+                byname = f"[royal_blue1]{byname}[/]"
             s += byname
             if i != project_num - 1:
-                s += " "
+                s += " | "
         return [row_name, s]
 
     def get_header(self):
         project_path = self.config.project_paths[self.runtime.cur_project_index]
 
-        table = Table(title="Unity Package Manager", box=self.box, show_header=False)
+        table = Table(title="\nUnity Package Manager", box=self.box, show_header=False)
         table.add_column()
         table.add_column()
         
@@ -55,7 +55,7 @@ class MainMenu:
         table.add_row(*self.__get_candidate_projects())
 
         # Unity项目路径
-        table.add_row("[Unity项目路径]", f"[cyan]{project_path.byname}[/] {project_path.path}")
+        table.add_row("[Unity项目路径]", f"[royal_blue1]{project_path.byname}[/] {project_path.path}")
 
         # RenderFramework路径
         table.add_row("[RenderFramework路径]", self.config.rf_path)
@@ -66,9 +66,9 @@ class MainMenu:
         if package_state.in_cache:
             package_position = "[green]Cache[/]"
             if not package_state.exists:
-                package_position += "[purple]（不存在本地文件）[/]"
+                package_position += "[medium_purple3]（不存在本地文件）[/]"
         else:
-            package_position = "[blue]Packages[/]"
+            package_position = "[orange3]Packages[/]"
 
         table.add_row("[Package位置]", package_position)
 

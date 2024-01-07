@@ -3,6 +3,8 @@ import utils
 from packageState import *
 from config import *
 from menuMgr import *
+from rich import box
+from rich.table import Table
 
 
 class Runtime:
@@ -38,14 +40,14 @@ class Runtime:
         try:
             self.config.load_config()
         except Exception as e:
-            utils.log("读取配置文件出错: " + str(e), utils.LogType.Error)
+            utils.log("读取配置文件出错: \n" + str(e), utils.LogType.Error)
             self.menu_mgr.switch_menu(MenuNames.CONFIG_ERROR_MENU)
             return
 
         try:
             self.package_state.analyze_package_state(self.get_cur_project_path())
         except Exception as e:
-            utils.log("分析项目结构出错：" + str(e), utils.LogType.Error)
+            utils.log("分析项目结构出错：\n" + str(e), utils.LogType.Error)
             self.menu_mgr.switch_menu(MenuNames.PACKAGE_ERROR_MENU)
             return
 
@@ -72,11 +74,18 @@ class Runtime:
             raise Exception(stderr)
         return len(stdout) > 0
     
+    @staticmethod
+    def get_header(s):
+        table = Table(title="\nUnity Package Manager", box=box.ROUNDED, show_header=False)
+        table.add_column()
+        table.add_row(s)
+        return table
+    
     def register_menu(self):
         self.menu_mgr.register_menu(
             MenuNames.CONFIG_ERROR_MENU,
             Menu(
-                utils.SPLITER + "\n读取配置文件出错",
+                lambda: Runtime.get_header("读取配置文件出错"),
                 [
                     KeyAction("w", "重新读取配置文件", None),
                     KeyAction("v", "切换工程", self.switch_project_index),
@@ -88,7 +97,7 @@ class Runtime:
         self.menu_mgr.register_menu(
             MenuNames.PACKAGE_ERROR_MENU,
             Menu(
-                utils.SPLITER + "\n读取项目信息出错",
+                lambda: Runtime.get_header("读取项目信息出错"),
                 [
                     KeyAction("w", "重新读取项目信息", None),
                     KeyAction("v", "切换工程", self.switch_project_index),
