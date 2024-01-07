@@ -13,6 +13,8 @@ class Config:
         self.project_paths = []
         self.rf_path = ""
         self.unity_editor_path = ""
+        self.package_name = ""
+        self.show_window_shortcut = []
 
     def load_config(self):
         try:
@@ -23,15 +25,17 @@ class Config:
 
         self.project_paths.clear()
         try:
-            project_paths_json = config_json["projectPaths"]
+            project_paths_json = config_json["project_paths"]
             for i in range(len(project_paths_json)):
                 project_path_json = project_paths_json[i]
                 project_path = ProjectPath("", "")
                 project_path.byname = project_path_json["byname"]
                 project_path.path = project_path_json["path"].replace("\\", "/")
                 self.project_paths.append(project_path)
-            self.rf_path = config_json["renderFrameworkPath"].replace("\\", "/")
-            self.unity_editor_path = config_json["unityEditorPath"].replace("\\", "/")
+            self.rf_path = config_json["render_framework_path"].replace("\\", "/")
+            self.unity_editor_path = config_json["unity_editor_path"].replace("\\", "/")
+            self.package_name = config_json["package_name"]
+            self.show_window_shortcut = config_json["show_window_shortcut"]
         except Exception:
             raise Exception("config.json格式错误")
 

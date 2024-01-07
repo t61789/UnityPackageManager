@@ -5,10 +5,11 @@ from packageState import *
 
 class MoveOutPackage:
 
-    def __init__(self, package_state: PackageState, menu_mgr: MenuMgr, runtime: Runtime):
+    def __init__(self, package_state: PackageState, menu_mgr: MenuMgr, runtime: Runtime, config: Config):
         self.package_state = package_state
         self.menu_mgr = menu_mgr
         self.runtime = runtime
+        self.config = config
 
     def add_framework_change_to_git(self, set_process, add_packages_lock_also: bool = False):
         set_process(0.5)
@@ -31,7 +32,7 @@ class MoveOutPackage:
 
         set_process(0.3)
 
-        package_json = packages_lock_json["dependencies"][utils.PACKAGE_NAME]
+        package_json = packages_lock_json["dependencies"][self.config.package_name]
         package_json["source"] = "embedded"
         package_json["version"] = "file:" + utils.get_package_full_name(self.package_state.version)
         package_json["depth"] = 0

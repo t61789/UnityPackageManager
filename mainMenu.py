@@ -2,6 +2,7 @@ import copyToRfProject
 import deleteShaderCache
 import git
 import moveOutPackage
+import utils
 from clearAllModifies import *
 from git import GitCommands
 from runtime import *
@@ -81,7 +82,7 @@ class MainMenu:
 
     def register_menu(self, menu_mgr: MenuMgr):
         copy_to_rf_project = copyToRfProject.CopyToRfProject(self.package_state, self.config, menu_mgr, self.runtime)
-        move_out_package = moveOutPackage.MoveOutPackage(self.package_state, menu_mgr, self.runtime)
+        move_out_package = moveOutPackage.MoveOutPackage(self.package_state, menu_mgr, self.runtime, self.config)
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
         clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
         git_commands = GitCommands(self.package_state, self.config)
@@ -100,7 +101,8 @@ class MainMenu:
                     KeyAction("b", "删除ShaderCache", delete_shader_cache.delete_shader_cache),
                     KeyAction("z", "匹配RF工程", git_commands.match_rf_version),
                     KeyAction("x", "更新RF工程", git_commands.remove_modifies_and_update_to_latest),
-                    KeyAction("q", "退出", utils.exit_application),
+                    KeyAction("q", "隐藏", utils.hide_window),
+                    KeyAction("Q", "退出", utils.exit_application),
                     # TODO 进阶操作
                 ],
             ),

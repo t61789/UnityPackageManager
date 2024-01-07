@@ -4,9 +4,11 @@ import re
 import shutil
 import subprocess
 import sys
+import ctypes
 
 from packageState import PackageVersion
 
+config = None
 
 class LogType(enum.Enum):
     Log = (1,)
@@ -14,8 +16,6 @@ class LogType(enum.Enum):
     Error = 3
 
 
-# PACKAGE_NAME = "com.baitian.polaris.renderframework"
-PACKAGE_NAME = "com.unity.render-pipelines.universal"
 SPLITER = "[-------------------------------------------------------------]"
 
 
@@ -141,6 +141,16 @@ def get_intent(intent: int):
     return intend_str
 
 
+def show_window():
+    whnd = ctypes.windll.kernel32.GetConsoleWindow()
+    ctypes.windll.user32.ShowWindow(whnd, 1)
+
+
+def hide_window():
+    whnd = ctypes.windll.kernel32.GetConsoleWindow()
+    ctypes.windll.user32.ShowWindow(whnd, 0)
+
+
 def log(message: str, t: LogType = LogType.Log):
     if t == LogType.Error:
         message = "[\x1b[41mERROR\x1b[0m]" + message
@@ -172,7 +182,7 @@ def get_package_version(package_path: str) -> PackageVersion:
 
 
 def get_package_full_name(package_version: PackageVersion) -> str:
-    return PACKAGE_NAME + "@" + package_version.to_str()
+    return config.package_name + "@" + package_version.to_str()
 
 
 def get_package_path(project_path: str, in_cache: bool, package_version: PackageVersion) -> str:

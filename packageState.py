@@ -74,10 +74,10 @@ class PackageState:
             raise Exception("读取packages-lock.json文件失败: " + str(e))
 
         try:
-            self.in_cache = packages_lock_json["dependencies"][utils.PACKAGE_NAME]["source"] != "embedded"
+            self.in_cache = packages_lock_json["dependencies"][self.config.package_name]["source"] != "embedded"
 
             if self.in_cache:
-                self.version = PackageVersion.load_from_str(packages_lock_json["dependencies"][utils.PACKAGE_NAME]["version"])
+                self.version = PackageVersion.load_from_str(packages_lock_json["dependencies"][self.config.package_name]["version"])
                 self.path = utils.get_package_path(project_path, self.in_cache, self.version)
                 self.exists = os.path.exists(utils.get_package_json_path(self.path))
         except Exception:
@@ -85,7 +85,7 @@ class PackageState:
 
         if not self.in_cache:
             # 如果包不在Cache里，packages-lock.json中就不包含版本信息，需要去Packages文件夹下找可用的包
-            available_package_dirs = PackageState.__find_available_package_directories(project_path, self.in_cache)
+            available_package_dirs = self.__find_available_package_directories(project_path, self.in_cache)
             if len(available_package_dirs) == 0:
                 raise Exception("packages-lock.json描述包在Packages内，但未找到可用的包，请使用Unity重新生成")
 
@@ -107,8 +107,7 @@ class PackageState:
         except Exception:
             raise Exception("读取RF工程版本失败，请检查RF工程配置是否正确")
 
-    @staticmethod
-    def __find_available_package_directories(project_path: str, in_cache: bool) -> list:
+    def __find_available_package_directories(self, project_path: str, in_cache: bool) -> list:
         available_package_dirs = []
         finding_dir = utils.get_unity_package_cache_path(project_path) if in_cache else utils.get_unity_packages_path(project_path)
 
@@ -116,7 +115,7 @@ class PackageState:
             dir_path = os.path.join(finding_dir, dir_name)
             if not os.path.isdir(dir_path):
                 continue
-            if utils.PACKAGE_NAME not in dir_name:
+            if self.config.package_name not in dir_name:
                 continue
             try:
                 with open(os.path.join(dir_path, "package.json")) as f:

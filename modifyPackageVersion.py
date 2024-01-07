@@ -54,7 +54,7 @@ class ModifyPackageVersion:
         packages_lock_json_path = utils.get_packages_lock_json_path(project_path)
         with open(packages_lock_json_path, "r") as f:
             package_json = json.load(f)
-        p = package_json["dependencies"][utils.PACKAGE_NAME]
+        p = package_json["dependencies"][self.config.package_name]
         p["version"] = package_version.to_str()
         with open(packages_lock_json_path, "w", newline="\n") as f:
             f.write(json.dumps(package_json, indent=2))
@@ -71,7 +71,7 @@ class ModifyPackageVersion:
         with open(manifest_json_path, "r") as f:
             manifest_json = json.load(f)
         d = manifest_json["dependencies"]
-        d[utils.PACKAGE_NAME] = package_version.to_str()
+        d[self.config.package_name] = package_version.to_str()
         with open(manifest_json_path, "w", newline="\r\n") as f:
             f.write(json.dumps(manifest_json, indent=2))
             f.flush()
