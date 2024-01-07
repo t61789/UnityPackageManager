@@ -5,6 +5,7 @@ import threading
 import time
 import datetime
 
+from rich import text
 from rich.panel import Panel
 from rich.progress import *
 from termcursor import termcursor
@@ -141,7 +142,7 @@ def get_execute_error_title(task_name: str, cmd: [str]):
     return f"[red]{task_name} {get_running_time()} Execute Command Error: {cmd_str}[/]"
 
 
-def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time = 0.5):
+def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.5):
     termcursor.hidecursor()
 
     output_list = []
@@ -152,15 +153,22 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
 
     global start_time
     start_time = time.perf_counter()
+    
+    def join_outputs(outputs):
+        s = "".join(outputs)
+        if s.endswith("\n"):
+            s = s[:-1]
+        return s
 
     with Live(refresh_per_second=20, transient=True) as live:
 
         def update_live():
             global spinner_index
             spinner_index = (spinner_index + 1) % len(spinner)
-            inner_s = "".join(output_list)
-            p = Panel.fit(inner_s, title=get_executing_title(task_name, cmd), title_align="left",
-                          height=len(output_list) + 2)
+            p = Panel.fit(
+                join_outputs(output_list),
+                title=get_executing_title(task_name, cmd),
+                title_align="left")
 
             live.update(p, refresh=True)
 
@@ -178,15 +186,16 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
 
     has_err = len(err_list) > 0
     if has_err and show_detail_when_error:
-        height = min(len(err_list) + 2, 100)
-        print(
-            Panel("".join(err_list), title=get_execute_error_title(task_name, cmd), title_align="left", height=height))
+        print(Panel.fit(
+            join_outputs(err_list),
+            title=get_execute_error_title(task_name, cmd),
+            title_align="left"))
 
     print(complete_info(task_name, time.perf_counter() - start_time, not has_err))
 
     termcursor.showcursor()
 
-    return not has_err, time.perf_counter() - start_time
+    return not has_err
 
 # success, elapsed_time = run_cmd_task("ping测试", ".", ["ping", "www.baidu.com"], show_detail_when_error=True)
 # print(complete_info("ping测试", elapsed_time, success))

@@ -16,12 +16,20 @@ class ClearAllModifies:
             print(utils.color("取消操作", 31))
             return
 
-        success = processTask.run_cmd_task("添加所有修改", self.runtime.get_cur_project_path(), ["git", "add", "."], show_detail_when_error=True)
-        if not success:
-            return
+        def task0():
+            return processTask.run_cmd_task(
+                "添加所有修改",
+                self.runtime.get_cur_project_path(),
+                ["git", "add", "."],
+                show_detail_when_error=True)
 
-        success = processTask.run_cmd_task("重置所有修改", self.runtime.get_cur_project_path(), ["git", "reset", "--hard", "head"], show_detail_when_error=True)
-        if not success:
-            return
-
-        print(utils.color("移除所有修改成功", 32))
+        def task1():
+            return processTask.run_cmd_task(
+                "重置所有修改",
+                self.runtime.get_cur_project_path(),
+                ["git", "reset", "--hard", "head"],
+                show_detail_when_error=True)
+        
+        all_succeed = processTask.run_tasks([task0, task1])
+        if all_succeed:
+            print(utils.color("移除所有修改成功", 32))

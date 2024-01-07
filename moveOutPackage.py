@@ -4,7 +4,7 @@ from packageState import *
 
 
 class MoveOutPackage:
-    
+
     def __init__(self, package_state: PackageState, menu_mgr: MenuMgr, runtime: Runtime):
         self.package_state = package_state
         self.menu_mgr = menu_mgr
@@ -49,44 +49,43 @@ class MoveOutPackage:
 
     def move_out_package(self, commit: bool = False):
         print()
+        package_cache_path = utils.get_package_path(self.runtime.get_cur_project_path(), True,
+                                                    self.package_state.version)
+        package_path = utils.get_package_path(self.runtime.get_cur_project_path(), False, self.package_state.version)
 
-        # 移出文件 ------------------------------------------
-        def step0(set_process):
-            src = utils.get_package_path(self.runtime.get_cur_project_path(), True, self.package_state.version)
-            dest = utils.get_package_path(self.runtime.get_cur_project_path(), False, self.package_state.version)
-            utils.copy_directory(src, dest, True, set_process)
-            return None
+        def task0():
+            def action(set_process):
+                src = package_cache_path
+                dest = package_path
+                utils.copy_directory(src, dest, True, set_process)
+                return None
 
-        if not processTask.run_step("移出Package文件: ", step0):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
+            return processTask.run_step(
+                "移出Package文件",
+                action)
 
-        # 修改json ------------------------------------------
-        if not processTask.run_step("修改packages-lock.json配置: ", self.modify_package_lock_json):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
+        def task1():
+            return processTask.run_step(
+                "修改packages-lock.json配置",
+                self.modify_package_lock_json)
 
-        # 将修改添加到git ------------------------------------------
-        def step2(set_process):
-            self.add_framework_change_to_git(set_process, True)
+        def task2():
+            return processTask.run_cmd_task(
+                "添加rf文件修改到git",
+                self.runtime.get_cur_project_path(),
+                ["git", "add", f"{package_path}/*"])
 
-        if not processTask.run_step("将修改添加到git: ", step2):
-            self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-            return
+        def task3():
+            return processTask.run_cmd_task(
+                "添加packages-lock.json修改到git",
+                self.runtime.get_cur_project_path(),
+                ["git", "add", "Packages/packages-lock.json"])
 
-        # 提交 ------------------------------------------
-        if commit:
-
-            def step3(set_process):
-                set_process(0.5)
-                _, stderr = self.runtime.execute_git_command(["commit", "-m", "feat：【RF】移出包体"])
-                if "error: " in stderr:
-                    raise Exception(stderr)
-                set_process(1)
-
-            if not processTask.run_step("提交修改到git: ", step3):
-                self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-                return
+        def task4():
+            return processTask.run_cmd_task(
+                "提交修改到git",
+                self.runtime.get_cur_project_path(),
+                ["git", "commit", "-m", "feat：【RF】移出包体"])
 
         """
         # 重新生成项目文件 ------------------------------------------
@@ -98,7 +97,14 @@ class MoveOutPackage:
         processTask.runStep("重新生成项目文件: ", step4)
         """
 
-        print(utils.color("移出完成", 32))
+        tasks = [task0, task1, task2, task3]
+        if commit:
+            tasks.append(task4)
+        all_succeed = processTask.run_tasks(tasks)
+
+        if all_succeed:
+            print(utils.color("移出完成", 32))
+
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
     def try_switch_move_out_package_menu(self):
@@ -113,7 +119,7 @@ class MoveOutPackage:
             return
 
         self.menu_mgr.switch_menu(MenuNames.MOVE_OUT_PACKAGE_MENU)
-        
+
     def register_menu(self):
         self.menu_mgr.register_menu(
             MenuNames.MOVE_OUT_PACKAGE_MENU,
