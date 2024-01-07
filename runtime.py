@@ -15,6 +15,7 @@ class Runtime:
     def switch_project_index(self):
         self.cur_project_index = (self.cur_project_index + 1) % max(len(self.config.project_paths), 1)
         print("开始切换到第" + str(self.cur_project_index) + "个工程")
+        self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
     def get_cur_project_path(self):
         return self.config.project_paths[self.cur_project_index].path
@@ -47,8 +48,6 @@ class Runtime:
             utils.log("分析项目结构出错：" + str(e), utils.LogType.Error)
             self.menu_mgr.switch_menu(MenuNames.PACKAGE_ERROR_MENU)
             return
-        
-        self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
     def execute_git_command(self, args: [str]):
         return utils.execute_cmd(["git"] + args, self.get_cur_project_path())
