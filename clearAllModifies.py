@@ -1,3 +1,4 @@
+import git
 import menuMgr
 import processTask
 from runtime import *
@@ -15,21 +16,7 @@ class ClearAllModifies:
         if not menuMgr.MenuMgr.confirm_menu("确认要移除所有的修改吗？"):
             print(utils.color("取消操作", 31))
             return
-
-        def task0():
-            return processTask.run_cmd_task(
-                "添加所有修改",
-                self.runtime.get_cur_project_path(),
-                ["git", "add", "."],
-                show_detail_when_error=True)
-
-        def task1():
-            return processTask.run_cmd_task(
-                "重置所有修改",
-                self.runtime.get_cur_project_path(),
-                ["git", "reset", "--hard", "head"],
-                show_detail_when_error=True)
         
-        all_succeed = processTask.run_tasks([task0, task1])
+        all_succeed = git.GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
         if all_succeed:
             print(utils.color("移除所有修改成功", 32))

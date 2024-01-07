@@ -59,7 +59,7 @@ class PackageState:
         self.config = cur_config
 
     @staticmethod
-    def __get_rf_package_version(rf_path: str) -> PackageVersion:
+    def get_rf_package_version(rf_path: str) -> PackageVersion:
         package_json_path = os.path.join(rf_path, "package.json")
         with open(package_json_path) as f:
             package_json = json.load(f)
@@ -103,7 +103,7 @@ class PackageState:
 
         # 判断RF工程版本
         try:
-            self.rf_version = PackageState.__get_rf_package_version(self.config.rf_path)
+            self.rf_version = PackageState.get_rf_package_version(self.config.rf_path)
         except Exception:
             raise Exception("读取RF工程版本失败，请检查RF工程配置是否正确")
 

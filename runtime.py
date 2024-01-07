@@ -39,6 +39,7 @@ class Runtime:
         except Exception as e:
             utils.log("读取配置文件出错: " + str(e), utils.LogType.Error)
             self.menu_mgr.switch_menu(MenuNames.CONFIG_ERROR_MENU)
+            return
 
         try:
             self.package_state.analyze_package_state(self.get_cur_project_path())
@@ -46,6 +47,8 @@ class Runtime:
             utils.log("分析项目结构出错：" + str(e), utils.LogType.Error)
             self.menu_mgr.switch_menu(MenuNames.PACKAGE_ERROR_MENU)
             return
+        
+        self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
     def execute_git_command(self, args: [str]):
         return utils.execute_cmd(["git"] + args, self.get_cur_project_path())

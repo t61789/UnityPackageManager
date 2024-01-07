@@ -7,6 +7,7 @@ import rich.console
 console = rich.console.Console(highlight=False)
 print = console.print
 
+
 class KeyAction:
     def __init__(self, key: str, describe: str, action: Callable):
         self.key = key

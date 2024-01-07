@@ -18,11 +18,14 @@ console = Console(highlight=False)
 print = console.print
 
 
-def complete_info(task_name: str, elapsed: float, succeed: bool):
+def complete_info(task_name: str, elapsed: float, succeed: bool, arrow=None):
     start_time_str = f"[cornflower_blue][{datetime.datetime.now().strftime('%H:%M:%S.%f')[:-4]}][/]"
     success_str = "[green][成功][/green]" if succeed else "[red][失败][/]"
     cost_time = f"[cyan][COST:{elapsed:.2f}s][/]"
-    return f"{start_time_str}>{cost_time}{success_str} {task_name}"
+    result = f"{start_time_str}>{cost_time}{success_str} {task_name}"
+    if arrow is not None:
+        result += f" {arrow}{arrow}{arrow}"
+    return result
 
 
 class TimeElapsedColumnAdvance(ProgressColumn):
@@ -109,7 +112,8 @@ def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callabl
     leave = False
     while True:
         time.sleep(0.05)
-        on_loop_start()
+        if on_loop_start:
+            on_loop_start()
         while not stdout_queue.empty():
             line = stdout_queue.get()
             on_stdout(line)
@@ -127,6 +131,18 @@ def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callabl
     thread_stderr.join()
 
 
+def run_cmd_read(cmd, work_space):
+    stdout = []
+    stderr = []
+    execute_cmd(
+        lambda x: stdout.append(x),
+        lambda x: stderr.append(x),
+        None,
+        cmd,
+        work_space)
+    return stdout, stderr
+
+
 def get_running_time():
     elapsed = time.perf_counter() - start_time
     return f"[[cyan]{spinner[spinner_index]} RUNNING {elapsed:.2f}s[/]]"
@@ -142,7 +158,14 @@ def get_execute_error_title(task_name: str, cmd: [str]):
     return f"[red]{task_name} {get_running_time()} Execute Command Error: {cmd_str}[/]"
 
 
-def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.5):
+def run_cmd_task(
+        task_name: str,
+        work_space: str,
+        cmd: [str],
+        show_detail_when_error: bool = True,
+        stay_time=0.2,
+        stdout_list=None,
+        stderr_list=None):
     termcursor.hidecursor()
 
     output_list = []
@@ -153,7 +176,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
 
     global start_time
     start_time = time.perf_counter()
-    
+
     def join_outputs(outputs):
         s = "".join(outputs)
         if s.endswith("\n"):
@@ -180,6 +203,8 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
             output_list.append(line)
             if len(output_list) > buffer_max_size:
                 output_list.pop(0)
+            if stdout_list is not None:
+                stdout_list.append(line)
 
         execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
         time.sleep(stay_time)
@@ -191,7 +216,11 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
             title=get_execute_error_title(task_name, cmd),
             title_align="left"))
 
-    print(complete_info(task_name, time.perf_counter() - start_time, not has_err))
+    if stderr_list is not None:
+        stderr_list.extend(err_list)
+
+    arrow = "^" if has_err else None
+    print(complete_info(task_name, time.perf_counter() - start_time, not has_err, arrow))
 
     termcursor.showcursor()
 

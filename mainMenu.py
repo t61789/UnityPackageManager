@@ -1,7 +1,9 @@
 import copyToRfProject
 import deleteShaderCache
+import git
 import moveOutPackage
 from clearAllModifies import *
+from git import GitCommands
 from runtime import *
 
 
@@ -82,6 +84,7 @@ class MainMenu:
         move_out_package = moveOutPackage.MoveOutPackage(self.package_state, menu_mgr, self.runtime)
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
         clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
+        git_commands = GitCommands(self.package_state, self.config)
             
         menu_mgr.register_menu(
             MenuNames.MAIN_MENU,
@@ -95,6 +98,8 @@ class MainMenu:
                     KeyAction("g", "复制Package到RF工程", copy_to_rf_project.start_copy),
                     KeyAction("s", "清除所有修改", clear_all_modifies.clear_all_modifies),
                     KeyAction("b", "删除ShaderCache", delete_shader_cache.delete_shader_cache),
+                    KeyAction("z", "匹配RF工程", git_commands.match_rf_version),
+                    KeyAction("x", "更新RF工程", git_commands.remove_modifies_and_update_to_latest),
                     KeyAction("q", "退出", utils.exit_application),
                     # TODO 进阶操作
                 ],
