@@ -36,17 +36,22 @@ class TimeElapsedColumnAdvance(ProgressColumn):
         return Text(str(delta)[2:10:], style="progress.elapsed")
 
 
-def run_tasks(tasks):
+def run_tasks(tasks, stop_when_failed=True):
+    all_succeed = True
     for task in tasks:
         try:
             if not task():
-                return False
+                all_succeed = False
+                if stop_when_failed:
+                    return False
         except Exception:
-            return False
-    return True
+            all_succeed = False
+            if stop_when_failed:
+                return False
+    return all_succeed
 
 
-def run_step(name: str, action: Callable[[Callable[[float], None]], None]) -> bool:
+def run_step(name: str, action, raise_exception=False) -> bool:
     termcursor.hidecursor()
     global start_time
     start_time = time.perf_counter()
@@ -67,6 +72,8 @@ def run_step(name: str, action: Callable[[Callable[[float], None]], None]) -> bo
         try:
             action(update_progress)
         except Exception as e:
+            if raise_exception:
+                raise e
             error_str = str(e)
 
     termcursor.showcursor()

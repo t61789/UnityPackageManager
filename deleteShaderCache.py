@@ -1,6 +1,7 @@
 import utils
 import shutil
 import os
+import processTask
 
 from runtime import Runtime
 
@@ -18,27 +19,26 @@ class DeleteShaderCache:
         return [shader_cache_db_path], [shader_cache_path, player_data_cache]
 
     def __delete(self, path: str, is_file: bool) -> bool:
-        utils.print_inline("正在删除：" + os.path.relpath(path, self.runtime.get_cur_project_path()))
-        try:
+        def delete_target(set_process):
+            set_process(0.5)
             if is_file:
                 os.remove(path)
             else:
                 shutil.rmtree(path)
-        except Exception as e:
-            print(utils.color(" 失败：", 31), e.args)
-            return False
-
-        print(utils.color(" 成功", 32))
-        return True
+            set_process(1)
+        title = "删除：" + os.path.relpath(path, self.runtime.get_cur_project_path())
+        return processTask.run_step(title, delete_target)
     
     def delete_shader_cache(self):
         print()
 
         (files, dirs) = self.__get_need_delete_files_path()
+        delete_tasks = []
 
         for p in files:
-            self.__delete(p, True)
+            delete_tasks.append(lambda x=p: self.__delete(x, True))
         for p in dirs:
-            self.__delete(p, False)
-
+            delete_tasks.append(lambda x=p: self.__delete(x, False))
+            
+        processTask.run_tasks(delete_tasks, stop_when_failed=False)
         print(utils.color("删除完成", 32))
