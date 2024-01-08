@@ -1,2 +1,2 @@
 set ws=WScript.CreateObject("WScript.Shell") 
-ws.Run "runPy.bat",0
+ws.Run "run.bat",0

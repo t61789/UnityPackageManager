@@ -196,7 +196,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
             execute_success = execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
         except Exception as e:
             execute_success = False
-        time.sleep(1)
+        time.sleep(stay_time)
 
     has_err = len(err_list) > 0
     if not execute_success and has_err and show_detail_when_error:
