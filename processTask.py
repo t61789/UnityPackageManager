@@ -92,7 +92,7 @@ def run_step(name: str, action, raise_exception=False) -> bool:
 
 
 def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8", errors="ignore")
 
     stdout_queue = queue.Queue()
     stderr_queue = queue.Queue()
