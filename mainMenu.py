@@ -115,7 +115,7 @@ class MainMenu:
                     KeyAction("s", "清除所有修改", clear_all_modifies.clear_all_modifies),
                     KeyAction("b", "删除ShaderCache", delete_shader_cache.delete_shader_cache),
                     KeyAction("z", "匹配RF工程", git_commands.match_rf_version),
-                    KeyAction("x", "更新RF工程", git_commands.remove_modifies_and_update_to_latest),
+                    KeyAction("x", "更新BN工程", git_commands.remove_modifies_and_update_to_latest),
                     KeyAction("q", "隐藏", utils.hide_window),
                     KeyAction("Q", "退出", utils.exit_application),
                     # TODO 进阶操作
