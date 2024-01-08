@@ -100,7 +100,7 @@ class MainMenu:
         move_out_package = moveOutPackage.MoveOutPackage(self.package_state, menu_mgr, self.runtime, self.config)
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
         clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
-        git_commands = GitCommands(self.package_state, self.config)
+        git_commands = GitCommands(self.package_state, self.config, self.runtime)
 
         menu_mgr.register_menu(
             MenuNames.MAIN_MENU,

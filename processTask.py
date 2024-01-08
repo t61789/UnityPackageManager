@@ -92,14 +92,13 @@ def run_step(name: str, action, raise_exception=False) -> bool:
 
 
 def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1,
-                               universal_newlines=True, cwd=cwd)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8")
 
     stdout_queue = queue.Queue()
     stderr_queue = queue.Queue()
 
     def read_stream(stream, q):
-        for l in iter(stream.readline, b''):
+        for l in iter(stream.readline, b""):
             if l == "":
                 break
             q.put(l)
@@ -130,16 +129,13 @@ def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callabl
     thread_stdout.join()
     thread_stderr.join()
 
+    return process.returncode == 0
+
 
 def run_cmd_read(cmd, work_space):
     stdout = []
     stderr = []
-    execute_cmd(
-        lambda x: stdout.append(x),
-        lambda x: stderr.append(x),
-        None,
-        cmd,
-        work_space)
+    execute_cmd(lambda x: stdout.append(x), lambda x: stderr.append(x), None, cmd, work_space)
     return stdout, stderr
 
 
@@ -158,14 +154,7 @@ def get_execute_error_title(task_name: str, cmd: [str]):
     return f"[red]{task_name} {get_running_time()} Execute Command Error: {cmd_str}[/]"
 
 
-def run_cmd_task(
-        task_name: str,
-        work_space: str,
-        cmd: [str],
-        show_detail_when_error: bool = True,
-        stay_time=0.2,
-        stdout_list=None,
-        stderr_list=None):
+def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.2, stdout_list=None, stderr_list=None):
     termcursor.hidecursor()
 
     output_list = []
@@ -188,10 +177,7 @@ def run_cmd_task(
         def update_live():
             global spinner_index
             spinner_index = (spinner_index + 1) % len(spinner)
-            p = Panel.fit(
-                join_outputs(output_list),
-                title=get_executing_title(task_name, cmd),
-                title_align="left")
+            p = Panel.fit(join_outputs(output_list), title=get_executing_title(task_name, cmd), title_align="left")
 
             live.update(p, refresh=True)
 
@@ -206,25 +192,26 @@ def run_cmd_task(
             if stdout_list is not None:
                 stdout_list.append(line)
 
-        execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
-        time.sleep(stay_time)
+        try:
+            execute_success = execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
+        except Exception as e:
+            execute_success = False
+        time.sleep(1)
 
     has_err = len(err_list) > 0
-    if has_err and show_detail_when_error:
-        print(Panel.fit(
-            join_outputs(err_list),
-            title=get_execute_error_title(task_name, cmd),
-            title_align="left"))
+    if not execute_success and has_err and show_detail_when_error:
+        print(Panel.fit(join_outputs(err_list), title=get_execute_error_title(task_name, cmd), title_align="left"))
 
     if stderr_list is not None:
         stderr_list.extend(err_list)
 
-    arrow = "^" if has_err else None
-    print(complete_info(task_name, time.perf_counter() - start_time, not has_err, arrow))
+    arrow = "^" if not execute_success and has_err else None
+    print(complete_info(task_name, time.perf_counter() - start_time, execute_success, arrow))
 
     termcursor.showcursor()
 
-    return not has_err
+    return execute_success
+
 
 # success, elapsed_time = run_cmd_task("ping测试", ".", ["ping", "www.baidu.com"], show_detail_when_error=True)
 # print(complete_info("ping测试", elapsed_time, success))

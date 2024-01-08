@@ -1,26 +1,28 @@
-﻿from rich.console import Console
-from rich.table import Table
-from rich import box
+﻿import subprocess
+from rich.progress import *
+import time
+from rich.panel import Panel
 
-no_inner_edge = box.Box(
-    "╭──╮\n"
-    "│  │\n"
-    "├─┼┤\n"
-    "│  │\n"
-    "├─┼┤\n"
-    "├─┼┤\n"
-    "│  │\n"
-    "╰──╯\n"
-)
-table = Table(title="Star Wars Movies", box=no_inner_edge, show_header=False)
+cmd = ["git", "pull"]
+cwd = "F:\\Unity\\UnityProjects\\Polaris_BN_Main\\UnityProj"
+process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8")
 
-table.add_column()
-table.add_column()
+process.communicate()
 
-table.add_row(*["Dec 20, 2019", "Star Wars: The Rise of Skywalker"])
-table.add_row("May 25, 2018", "Solo: A Star Wars Story")
-table.add_row("Dec 15, 2017", "Star Wars Ep. V111: The Last Jedi")
-table.add_row("Dec 16, 2016", "Rogue One: A Star Wars Story")
+print(process.returncode)
 
-console = Console()
-console.print(table)
+# with Live(refresh_per_second=20, transient=True) as live:
+
+#     def update_live(s):
+#         p = Panel.fit(s, title="title", title_align="left")
+
+#         live.update(p, refresh=True)
+
+#     s = ""
+#     for l in iter(process.stdout.readline, b""):
+#         if l == "":
+#             break
+#         s += l
+#         # update_live(l)
+
+#     time.sleep(0.1)
