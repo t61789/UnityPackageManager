@@ -23,7 +23,7 @@ class GitCommands:
             return processTask.run_cmd_task("获取更新", work_space, ["git", "fetch"])
 
         def task1():
-            return processTask.run_cmd_task("拉取更新", work_space, ["git", "rebase", "@{u}"])
+            return processTask.run_cmd_task("拉取更新", work_space, ["git", "pull", "--no-rebase"])
 
         return processTask.run_tasks([task0, task1])
 

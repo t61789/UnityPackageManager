@@ -2,14 +2,13 @@
 from rich.progress import *
 import time
 from rich.panel import Panel
+import processTask
 
-cmd = ["git", "pull"]
+cmd = ["git", "pull", "--no-rebase"]
 cwd = "F:\\Unity\\UnityProjects\\Polaris_BN_Main\\UnityProj"
 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8")
 
-process.communicate()
-
-print(process.returncode)
+processTask.execute_cmd(lambda x: print(x), lambda x: print(x), None, cmd, cwd)
 
 # with Live(refresh_per_second=20, transient=True) as live:
 
