@@ -7,7 +7,6 @@ from packageState import *
 from config import Config
 from runtime import Runtime
 
-
 console = rich.console.Console(highlight=False)
 print = console.print
 
@@ -19,22 +18,42 @@ class GitCommands:
         self.runtime = runtime
 
     @staticmethod
+    def match_branch_to_upstream(work_space: str):
+        success, cur_branch_name, _ = processTask.execute_cmd_simple(["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                                                                     work_space)
+        if not success:
+            print("[red]获取当前分支名失败[/]")
+            return False
+        success, cur_upstream_name, _ = processTask.execute_cmd_simple(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD@{upstream}"], work_space)
+        if not success:
+            print("[red]当前分支未跟踪远程分支[/]")
+            return False
+
+        return processTask.run_cmd_task(
+            "将跟踪的远程分支强制检出到当前分支",
+            work_space,
+            ["git", "checkout", "-B", cur_branch_name, cur_upstream_name, "--progress", "-f"])
+
+    @staticmethod
     def update_to_latest(work_space: str):
         def task0():
             return processTask.run_cmd_task("获取更新", work_space, ["git", "fetch"])
 
         def task1():
-            return processTask.run_cmd_task("拉取更新", work_space, ["git", "pull", "--no-rebase"])
+            return GitCommands.match_branch_to_upstream(work_space)
 
         return processTask.run_tasks([task0, task1])
 
     @staticmethod
     def remove_all_modifies(work_space: str):
         def task0():
-            return processTask.run_cmd_task("添加所有修改", work_space, ["git", "add", "."], show_detail_when_error=True)
+            return processTask.run_cmd_task("添加所有修改", work_space, ["git", "add", "."],
+                                            show_detail_when_error=True)
 
         def task1():
-            return processTask.run_cmd_task("重置所有修改", work_space, ["git", "reset", "--hard", "head"], show_detail_when_error=True)
+            return processTask.run_cmd_task("重置所有修改", work_space, ["git", "reset", "--hard", "head"],
+                                            show_detail_when_error=True)
 
         return processTask.run_tasks([task0, task1])
 
@@ -43,7 +62,8 @@ class GitCommands:
         std_out = []
         std_err = []
         succeed = processTask.run_cmd_task(
-            "获取需要推送的提交数量", work_space, ["git", "rev-list", "--count", "@{upstream}.."], stdout_list=std_out, stderr_list=std_err
+            "获取需要推送的提交数量", work_space, ["git", "rev-list", "--count", "@{upstream}.."], stdout_list=std_out,
+            stderr_list=std_err
         )
         if not succeed or len(std_out) == 0:
             return -1
@@ -53,7 +73,8 @@ class GitCommands:
     def has_un_commit_changes(work_space: str):
         std_out = []
         std_err = []
-        succeed = processTask.run_cmd_task("获取未提交的修改", work_space, ["git", "status", "-s"], stdout_list=std_out, stderr_list=std_err)
+        succeed = processTask.run_cmd_task("获取未提交的修改", work_space, ["git", "status", "-s"], stdout_list=std_out,
+                                           stderr_list=std_err)
         if not succeed:
             return True
         return len(std_out) != 0
@@ -134,7 +155,8 @@ class GitCommands:
             return False
 
         # 切换到目标提交
-        succeed = processTask.run_cmd_task("切换到目标提交", self.config.rf_path, ["git", "reset", "--hard", target_hash])
+        succeed = processTask.run_cmd_task("切换到目标提交", self.config.rf_path,
+                                           ["git", "reset", "--hard", target_hash])
         if not succeed:
             return False
 

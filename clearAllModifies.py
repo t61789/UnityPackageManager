@@ -1,4 +1,4 @@
-import git
+import git_commands
 import menuMgr
 import processTask
 from runtime import *
@@ -17,6 +17,6 @@ class ClearAllModifies:
             print(utils.color("取消操作", 31))
             return
         
-        all_succeed = git.GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
+        all_succeed = git_commands.GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
         if all_succeed:
             print(utils.color("移除所有修改成功", 32))

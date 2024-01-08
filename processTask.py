@@ -91,8 +91,40 @@ def run_step(name: str, action, raise_exception=False) -> bool:
         return False
 
 
+def execute_cmd_simple(cmd: [str], cwd: str, remove_end=True):
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd,
+                               encoding="utf-8", errors="ignore")
+    stdout, stderr = process.communicate()
+    if remove_end:
+        if stdout and stdout.endswith("\n"):
+            stdout = stdout[:-1]
+        if stderr and stderr.endswith("\n"):
+            stderr = stderr[:-1]
+    return process.returncode == 0, stdout, stderr
+
+
+def run_simple_cmd_tasks(tasks, stop_when_failed=True):
+    all_succeed = True
+    outputs = []
+    for task in tasks:
+        try:
+            succeed, stdout, stderr = task()
+            if not succeed:
+                stdout = None
+                all_succeed = False
+                if stop_when_failed:
+                    return False
+            outputs.append((succeed, stdout, stderr))
+        except Exception:
+            all_succeed = False
+            if stop_when_failed:
+                return False
+    return all_succeed
+
+
 def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8", errors="ignore")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd,
+                               encoding="utf-8", errors="ignore")
 
     stdout_queue = queue.Queue()
     stderr_queue = queue.Queue()
@@ -154,7 +186,8 @@ def get_execute_error_title(task_name: str, cmd: [str]):
     return f"[red]{task_name} {get_running_time()} Execute Command Error: {cmd_str}[/]"
 
 
-def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.2, stdout_list=None, stderr_list=None):
+def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.2,
+                 stdout_list=None, stderr_list=None):
     termcursor.hidecursor()
 
     output_list = []
@@ -211,7 +244,6 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
     termcursor.showcursor()
 
     return execute_success
-
 
 # success, elapsed_time = run_cmd_task("ping测试", ".", ["ping", "www.baidu.com"], show_detail_when_error=True)
 # print(complete_info("ping测试", elapsed_time, success))

@@ -1,27 +1,21 @@
-﻿import subprocess
-from rich.progress import *
-import time
-from rich.panel import Panel
-import processTask
+﻿import processTask
 
-cmd = ["git", "pull", "--no-rebase"]
-cwd = "F:\\Unity\\UnityProjects\\Polaris_BN_Main\\UnityProj"
-process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd, encoding="utf-8")
+cur_work_path = "D:\\GitLocal"
+_ , cur_branch_name, _ = processTask.execute_cmd_simple(["git", "rev-parse", "--abbrev-ref", "HEAD"], cur_work_path)
+print("done")
+_ , cur_upstream_name, _ = processTask.execute_cmd_simple(["git", "rev-parse", "--abbrev-ref", "HEAD@{upstream}"], cur_work_path)
+print("done")
 
-processTask.execute_cmd(lambda x: print(x), lambda x: print(x), None, cmd, cwd)
+if cur_branch_name.endswith("\n"):
+    cur_branch_name = cur_branch_name[:-1]
+if cur_upstream_name.endswith("\n"):
+    cur_upstream_name = cur_upstream_name[:-1]
 
-# with Live(refresh_per_second=20, transient=True) as live:
+processTask.execute_cmd(
+    lambda line: print(line),
+    lambda line: print(line),
+    None,
+    ["git", "checkout", "-B", cur_branch_name, cur_upstream_name, "--progress", "-f"],
+    cur_work_path
+)
 
-#     def update_live(s):
-#         p = Panel.fit(s, title="title", title_align="left")
-
-#         live.update(p, refresh=True)
-
-#     s = ""
-#     for l in iter(process.stdout.readline, b""):
-#         if l == "":
-#             break
-#         s += l
-#         # update_live(l)
-
-#     time.sleep(0.1)

@@ -2,11 +2,11 @@ from rich.panel import Panel
 
 import copyToRfProject
 import deleteShaderCache
-import git
+import git_commands
 import moveOutPackage
 import utils
 from clearAllModifies import *
-from git import GitCommands
+from git_commands import GitCommands
 from runtime import *
 from rich import box
 from rich.table import Table
