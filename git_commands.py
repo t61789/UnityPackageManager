@@ -38,7 +38,7 @@ class GitCommands:
     @staticmethod
     def update_to_latest(work_space: str):
         def task0():
-            return processTask.run_cmd_task("获取更新", work_space, ["git", "fetch"])
+            return processTask.run_cmd_task("获取更新", work_space, ["git", "fetch", "--progress"])
 
         def task1():
             return GitCommands.match_branch_to_upstream(work_space)
