@@ -1,11 +1,12 @@
 ﻿import re
 
 import rich
-
+import menuMgr
 import processTask
 from packageState import *
 from config import Config
 from runtime import Runtime
+
 
 console = rich.console.Console(highlight=False)
 print = console.print
@@ -58,6 +59,12 @@ class GitCommands:
         return len(std_out) != 0
 
     def remove_modifies_and_update_to_latest(self):
+        print()
+
+        if not menuMgr.MenuMgr.confirm_menu("确认要移除所有的修改吗？"):
+            print(utils.color("取消操作", 31))
+            return
+
         succeed = GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
         if not succeed:
             return False

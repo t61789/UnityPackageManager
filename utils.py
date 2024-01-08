@@ -5,10 +5,12 @@ import shutil
 import subprocess
 import sys
 import ctypes
+import time
 
 from packageState import PackageVersion
 
 config = None
+
 
 class LogType(enum.Enum):
     Log = (1,)
@@ -141,14 +143,26 @@ def get_intent(intent: int):
     return intend_str
 
 
-def show_window():
-    whnd = ctypes.windll.kernel32.GetConsoleWindow()
-    ctypes.windll.user32.ShowWindow(whnd, 1)
-
-
 def hide_window():
     whnd = ctypes.windll.kernel32.GetConsoleWindow()
     ctypes.windll.user32.ShowWindow(whnd, 0)
+
+
+def show_window():
+    whnd = ctypes.windll.kernel32.GetConsoleWindow()
+    # ctypes.windll.user32.ShowWindow(whnd, 1)
+
+    shell = ctypes.windll.user32.GetShellWindow()
+    ctypes.windll.user32.ShowWindow(whnd, 1)
+    ctypes.windll.user32.SetForegroundWindow(shell)  # 模拟点击任务栏，然后再切回来
+    ctypes.windll.user32.keybd_event(18, 0, 0, 0)  # 模拟Alt键
+    ctypes.windll.user32.keybd_event(18, 0, 2, 0)  # 释放Alt键
+    ctypes.windll.user32.SetForegroundWindow(whnd)
+
+    # ctypes.windll.user32.ShowWindow(whnd, 3)
+    # ctypes.windll.user32.SetWindowPos(whnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002)
+    # ctypes.windll.user32.SetForegroundWindow(whnd)
+    # ctypes.windll.user32.SetWindowPos(whnd, 1, 0, 0, 0, 0, 0x0001)
 
 
 def log(message: str, t: LogType = LogType.Log):
