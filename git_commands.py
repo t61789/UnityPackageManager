@@ -3,6 +3,7 @@
 import rich
 import menuMgr
 import processTask
+import utils
 from packageState import *
 from config import Config
 from runtime import Runtime
@@ -47,15 +48,24 @@ class GitCommands:
 
     @staticmethod
     def remove_all_modifies(work_space: str):
-        def task0():
-            return processTask.run_cmd_task("添加所有修改", work_space, ["git", "add", "."],
-                                            show_detail_when_error=True)
+        stdout_list = []
+        succeed = processTask.run_cmd_task("查询是否有修改", work_space, ["git", "status", "-s"], stdout_list=stdout_list)
+        
+        if not succeed:
+            utils.print_hint("[red]获取当前修改失败[/]")
+            return False
+        else: 
+            stdout = "".join(stdout_list)
+            stdout = stdout.strip()
+            if len(stdout) == 0:
+                utils.print_hint("[green]当前没有修改，无需重置[/]")
+                return True
 
-        def task1():
-            return processTask.run_cmd_task("重置所有修改", work_space, ["git", "reset", "--hard", "head"],
-                                            show_detail_when_error=True)
-
-        return processTask.run_tasks([task0, task1])
+        return processTask.run_cmd_task(
+            "重置所有修改", 
+            work_space,
+            ["git", "reset", "--hard", "&&", "git", "clean", "-fd"],
+            show_detail_when_error=True, shell=True)
 
     @staticmethod
     def get_need_push_commits_num(work_space: str):
@@ -169,4 +179,4 @@ class GitCommands:
 
         succeed = succeed and cur_version == target_version
         if not succeed:
-            print("[red]切换后的版本不匹配[/]")
+            utils.print_hint("[red]切换后的版本不匹配[/]")

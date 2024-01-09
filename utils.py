@@ -6,9 +6,13 @@ import subprocess
 import sys
 import ctypes
 import time
+import datetime
 
 from packageState import PackageVersion
+from rich.console import Console
 
+console = Console(highlight=False)
+print = console.print
 config = None
 
 
@@ -23,6 +27,10 @@ SPLITER = "[-------------------------------------------------------------]"
 
 def exit_application():
     sys.exit(0)
+    
+def print_hint(msg):
+    start_time_str = f"[cornflower_blue][{datetime.datetime.now().strftime('%H:%M:%S.%f')[:-4]}][/]"
+    print(f"{start_time_str}>{msg}")
 
 
 def execute_cmd(args: [str], cwd: str) -> [str, str]:
@@ -133,7 +141,7 @@ def clear_directory(path: str, set_process):
 
 
 def print_inline(char):
-    print(char, end="", flush=True)
+    print(char, end="")
 
 
 def get_intent(intent: int):

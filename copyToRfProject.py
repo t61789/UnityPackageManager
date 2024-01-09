@@ -29,7 +29,7 @@ class CopyToRfProject:
 
         all_succeed = processTask.run_tasks([task0, task1])
         if all_succeed:
-            print(utils.color("复制成功", 32))
+            utils.print_hint("[green]复制成功[/]")
 
     def start_copy(self):
         if self.package_state.in_cache:
@@ -41,7 +41,7 @@ class CopyToRfProject:
             confirm = MenuMgr.confirm_menu(utils.color("BN_Package版本与RF_Package版本不一致，是否继续？", 33))
             print()
             if not confirm:
-                print(utils.color("取消操作", 31))
+                utils.print_hint("[red]取消操作[/]")
                 return
 
         # TODO 检查RF工程git是否有修改, 用git status

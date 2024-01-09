@@ -1,4 +1,5 @@
 import processTask
+import utils
 from config import *
 from menuMgr import *
 from runtime import *
@@ -127,7 +128,7 @@ class ModifyPackageVersion:
         
         all_task_succeed = processTask.run_tasks([task0, task1, task2, task3, task4])
         if all_task_succeed:
-            print(utils.color("修改成功", 32))
+            utils.print_hint("[green]修改成功[/]")
 
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
@@ -152,7 +153,7 @@ class ModifyPackageVersion:
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
         if new_version == self.package_state.rf_version:
-            print(utils.color("版本号未改变，取消操作", 31))
+            utils.print_hint("[yellow]版本号未改变，取消操作[/]")
             self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
             return
 
@@ -175,7 +176,7 @@ class ModifyPackageVersion:
         
         all_task_succeed = processTask.run_tasks([task0, task1, task2])
         if all_task_succeed:
-            print(utils.color("修改成功", 32))
+            utils.print_hint("[green]修改成功[/]")
             return
 
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)

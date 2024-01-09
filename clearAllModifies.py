@@ -19,4 +19,4 @@ class ClearAllModifies:
         
         all_succeed = git_commands.GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
         if all_succeed:
-            print(utils.color("移除所有修改成功", 32))
+            utils.print_hint("[green]移除所有修改成功[/]")

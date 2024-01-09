@@ -1,9 +1,12 @@
 {
-  "render_framework_path": "T:\\RenderFramework",
-  "show_window_shortcut": ["alt", "x"],
-  "package_name": "com.unity.render-pipelines.universal",
+  "render_framework_path": "D:\\Unity\\UnityProjects\\Polaris_RenderFramework",
+  "show_window_shortcut": [
+    "alt",
+    "x"
+  ],
+  "package_name": "com.baitian.polaris.renderframework",
   "project_paths": [
-    { "byname": "Main", "path": "D:\\UnityProjects\\PJGRASS" },
+    { "byname": "Main", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_Main\\UnityProj" },
     { "byname": "CBT1", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_CBT1\\UnityProj" },
     { "byname": "Develop", "path": "F:\\Unity\\UnityProjects\\Polaris_BN_Dev\\UnityProj" }
   ],

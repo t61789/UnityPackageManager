@@ -122,9 +122,9 @@ def run_simple_cmd_tasks(tasks, stop_when_failed=True):
     return all_succeed
 
 
-def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str):
+def execute_cmd(on_stdout: callable, on_stderr: callable, on_loop_start: callable, cmd: [str], cwd: str, shell=False):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, cwd=cwd,
-                               encoding="utf-8", errors="ignore")
+                               encoding="utf-8", errors="ignore", shell=shell)
 
     stdout_queue = queue.Queue()
     stderr_queue = queue.Queue()
@@ -187,7 +187,7 @@ def get_execute_error_title(task_name: str, cmd: [str]):
 
 
 def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_error: bool = True, stay_time=0.2,
-                 stdout_list=None, stderr_list=None):
+                 stdout_list=None, stderr_list=None, shell=False):
     termcursor.hidecursor()
 
     output_list = []
@@ -226,7 +226,7 @@ def run_cmd_task(task_name: str, work_space: str, cmd: [str], show_detail_when_e
                 stdout_list.append(line)
 
         try:
-            execute_success = execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space)
+            execute_success = execute_cmd(add_stdout, add_stderr, update_live, cmd, work_space, shell)
         except Exception as e:
             execute_success = False
         time.sleep(stay_time)

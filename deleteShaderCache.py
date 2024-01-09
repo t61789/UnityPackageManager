@@ -41,4 +41,4 @@ class DeleteShaderCache:
             delete_tasks.append(lambda x=p: self.__delete(x, False))
             
         processTask.run_tasks(delete_tasks, stop_when_failed=False)
-        print(utils.color("删除完成", 32))
+        utils.print_hint("[green]删除完成[/]")

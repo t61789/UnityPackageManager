@@ -1,4 +1,5 @@
 import processTask
+import utils
 from runtime import *
 from packageState import *
 
@@ -104,7 +105,7 @@ class MoveOutPackage:
         all_succeed = processTask.run_tasks(tasks)
 
         if all_succeed:
-            print(utils.color("移出完成", 32))
+            utils.print_hint("[green]移出完成[/]")
 
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
 
@@ -112,11 +113,11 @@ class MoveOutPackage:
         print()
 
         if not self.package_state.in_cache:
-            print(utils.color("Package不在Cache中，无需移出", 33))
+            utils.print_hint("[yellow]Package不在Cache中，无需移出[/]")
             return
 
         if not self.package_state.exists:
-            print(utils.color("Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载", 33))
+            utils.print_hint("[yellow]Cache内不存在本地Package文件，无需移出，可以使用Unity重新下载[/]")
             return
 
         self.menu_mgr.switch_menu(MenuNames.MOVE_OUT_PACKAGE_MENU)
