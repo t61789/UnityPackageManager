@@ -1,3 +1,4 @@
+import processTask
 import utils
 
 from packageState import *
@@ -13,7 +14,7 @@ class Runtime:
         self.config = cur_config
         self.menu_mgr = menu_mgr
         self.package_state = package_state
-
+        
     def switch_project_index(self):
         self.cur_project_index = (self.cur_project_index + 1) % max(len(self.config.project_paths), 1)
         print("开始切换到第" + str(self.cur_project_index) + "个工程")
@@ -35,6 +36,20 @@ class Runtime:
             ],
             self.get_cur_project_path(),
         )
+    
+    def get_git_status(self):
+        succeed, std_out, std_err = processTask.execute_cmd_simple(["git", "status", "--porcelain"], self.get_cur_project_path())
+        if succeed:
+            has_changes = len(std_out) > 0
+        else:
+            has_changes = True
+        succeed, std_out, std_err = processTask.execute_cmd_simple(["git", "branch", "--show-current"], self.get_cur_project_path())
+        if succeed:
+            branch = std_out
+        else:
+            branch = "UNKNOWN_BRANCH"
+        return has_changes, branch
+            
 
     def initialize_tick(self):
         try:

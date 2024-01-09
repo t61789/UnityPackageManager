@@ -74,9 +74,16 @@ class MainMenu:
 
         bn_version = package_state.version
         rf_version = package_state.rf_version
+        
+        bn_version_str = bn_version.to_str("yellow")
+        
+        has_changes, branch = self.runtime.get_git_status()
+        has_changes = '*' if has_changes else ''
+        branch = f"[[slate_blue1]{branch}[/]{has_changes}]"
+        package_str = f"{bn_version_str} {branch}"
 
         # BN Package版本
-        table.add_row("[BN_Package版本]", bn_version.to_str("yellow"))
+        table.add_row("[BN_Package版本]", package_str)
 
         # RF Package版本
         if rf_version == bn_version:
