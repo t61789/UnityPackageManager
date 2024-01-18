@@ -36,13 +36,17 @@ class Runtime:
             ],
             self.get_cur_project_path(),
         )
-    
-    def get_git_status(self):
-        succeed, std_out, std_err = processTask.execute_cmd_simple(["git", "status", "--porcelain"], self.get_cur_project_path())
-        if succeed:
-            has_changes = len(std_out) > 0
+
+    def get_git_status(self, get_has_changes=True):
+        if get_has_changes:
+            succeed, std_out, std_err = processTask.execute_cmd_simple(["git", "status", "--porcelain"], self.get_cur_project_path())
+            if succeed:
+                has_changes = len(std_out) > 0
+            else:
+                has_changes = True
         else:
-            has_changes = True
+            has_changes = False
+
         succeed, std_out, std_err = processTask.execute_cmd_simple(["git", "branch", "--show-current"], self.get_cur_project_path())
         if succeed:
             branch = std_out

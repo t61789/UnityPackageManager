@@ -76,9 +76,9 @@ class MainMenu:
         rf_version = package_state.rf_version
         
         bn_version_str = bn_version.to_str("yellow")
-        
-        has_changes, branch = self.runtime.get_git_status()
-        has_changes = '*' if has_changes else ''
+
+        has_changes, branch = self.runtime.get_git_status(False)
+        has_changes = "*" if has_changes else ""
         branch = f"[[slate_blue1]{branch}[/]{has_changes}]"
         package_str = f"{bn_version_str} {branch}"
 

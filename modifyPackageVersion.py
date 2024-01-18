@@ -177,10 +177,8 @@ class ModifyPackageVersion:
         all_task_succeed = processTask.run_tasks([task0, task1, task2])
         if all_task_succeed:
             utils.print_hint("[green]修改成功[/]")
-            return
 
         self.menu_mgr.switch_menu(MenuNames.MAIN_MENU)
-        return
 
     def register_menu(self):
         self.menu_mgr.register_menu(
