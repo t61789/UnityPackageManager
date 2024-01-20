@@ -1,5 +1,6 @@
 from rich.panel import Panel
 
+import check_status as cs
 import copyToRfProject
 import deleteShaderCache
 import git_commands
@@ -108,6 +109,7 @@ class MainMenu:
         delete_shader_cache = deleteShaderCache.DeleteShaderCache(self.runtime)
         clear_all_modifies = ClearAllModifies(menu_mgr, self.runtime)
         git_commands = GitCommands(self.package_state, self.config, self.runtime)
+        check_status = cs.CheckStatus(self.runtime)
 
         menu_mgr.register_menu(
             MenuNames.MAIN_MENU,
@@ -123,6 +125,7 @@ class MainMenu:
                     KeyAction("b", "删除ShaderCache", delete_shader_cache.delete_shader_cache),
                     KeyAction("z", "匹配RF工程", git_commands.match_rf_version),
                     KeyAction("x", "更新BN工程", git_commands.remove_modifies_and_update_to_latest),
+                    KeyAction("f", "查询当前修改", check_status.check),
                     KeyAction("q", "隐藏", utils.hide_window),
                     KeyAction("Q", "退出", utils.exit_application),
                     # TODO 进阶操作

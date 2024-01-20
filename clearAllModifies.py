@@ -14,7 +14,7 @@ class ClearAllModifies:
         print()
 
         if not menuMgr.MenuMgr.confirm_menu("确认要移除所有的修改吗？"):
-            print(utils.color("取消操作", 31))
+            utils.print_hint("[red]取消操作[/]")
             return
         
         all_succeed = git_commands.GitCommands.remove_all_modifies(self.runtime.get_cur_project_path())
